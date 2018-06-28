@@ -15,7 +15,7 @@ Sample Solutions - Version 5.0.0-v1
 
     $ cd ~/confluent-labs
 
-. Optional: Open this folder in your favorite code editor; e.g. if you have *VS Code* installed then:
+. *Optional:* Open this folder in your favorite code editor; e.g. if you have *VS Code* installed then:
 
     $ code .
 

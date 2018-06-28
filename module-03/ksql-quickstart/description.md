@@ -1,57 +1,40 @@
-# Run the KSQL Quickstart on Play-with-Docker
+# Run the KSQL Quickstart
 
-In this hands-on lab we're going to play with KSQL. We're running all necessary components such as Kafka or Zookeeper and KSQL server and CLI in Docker containers on [Play with Docker](https://labs.play-with-docker.com).
-
-## Provisioning the Infrastructure
-
-1. Create a one node Docker Swarm in Play with Docker (https://labs.play-with-docker.com)
-
-    ```bash
-    $ docker swarm init --advertise-addr eth0
-    ```
-
-2. I highly recommend to use `tmux` on the node (it is already installed) to have multi-pane support in the terminal. 
-
-    See the following link for a `tmux` cheat sheet: http://atkinsam.com/documents/tmux.pdf
+In this hands-on lab we're going to play with KSQL. We're running all necessary components such as Kafka or Zookeeper and KSQL server and CLI in Docker containers.
 
 ## Running the Confluent Platform
 
-Now we're ready to run the Confluent platform consisting of Zookeeper, Kafka, KSQL server and CLI on the Docker Swarm we just created.
+Let's run the Confluent platform consisting of Zookeeper, Kafka, KSQL server and CLI on a Docker host such as our laptop running **Docker for Windows/Mac**.
 
-1. Create a folder `ksql` and navigate to it:
+1. In our `module-03` folder create a subfolder `ksql-quickstart` and navigate to it:
 
     ```bash
-    $ mkdir ~/ksql && cd ~/ksql
+    $ cd ~/confluent-labs/module-03
+    $ mkdir ksql-quickstart && cd ksql-quickstart
     ```
 
-2. Download the `stack.yml` file from GitHub:
+2. Download the `docker-compose.yml` file from GitHub:
 
     ```bash
-    $ curl -L https://bit.ly/2HdOCuS -o stack.yml
+    $ curl -L https://bit.ly/2KdQl8Z -o docker-compose.yml
     ```
 
-3. Browse through the `stack.yml` file and try to identify the individual components of the application:
+3. Browse through the `docker-compose.yml` file and try to identify the individual components of the application:
 
     ```bash
-    $ less stack.yml
+    $ less docker-compose.yml
     ```
 
 4. Run the application with:                
 
     ```bash
-    $ docker stack deploy -c stack.yml demo
+    $ docker-compose up -d
     ```
 
-5. Wait until the app is up and running:    
+5. Wait until all the services of the app are up and running:    
 
     ```bash
-    $ docker stack ps demo`
-    ```
-
-    or watch the services until all show `1/1` in the `Replicas` column:
-
-    ```bash
-    $ watch docker service ls
+    $ docker-compose ps
     ```
 
 ## Running the KSQL CLI
@@ -60,20 +43,20 @@ Now we're ready to run the Confluent platform consisting of Zookeeper, Kafka, KS
 
     ```
     $ docker container run -it --rm \
-        --name cli \
+        --hostname cli \
         -e STREAMS_BOOTSTRAP_SERVERS=kafka:29092 \
         -e STREAMS_SCHEMA_REGISTRY_HOST=schema-registry \
         -e STREAMS_SCHEMA_REGISTRY_PORT=8081 \
-        --network demo_demo-net \
+        --network ksql-quickstart_demo-net \
         confluentinc/ksql-cli:4.1.0 /bin/bash
     ```
 
-    We're running the KSQL CLI from withing a container that we have attached to the network `demo_demo-net` on which the Confluent platform runs.
+    We're running the KSQL CLI from withing a container that we have attached to the network `ksql-quickstart_demo-net` on which the Confluent platform runs.
 
 2. Within the above container start the KSQL CLI:
 
     ```bash
-    /# ksql http://ksql-server:8088
+    root@cli:/# ksql http://ksql-server:8088
     ```
 
 ## Testing KSQL
@@ -151,7 +134,7 @@ For more details please see the [quick start](https://docs.confluent.io/current/
 
     ```bash
     $ docker container run -it --rm \
-        --network demo_demo-net \
+        --network ksql-quickstart_demo-net \
         confluentinc/cp-enterprise-kafka:4.1.0 kafka-console-consumer \
             --topic pageviews \
             --bootstrap-server kafka:29092 \
@@ -164,7 +147,7 @@ For more details please see the [quick start](https://docs.confluent.io/current/
 
     ```bash
     $ docker container run -it --rm \
-        --network demo_demo-net \
+        --network ksql-quickstart_demo-net \
         confluentinc/cp-enterprise-kafka:4.1.0 kafka-console-consumer \
             --topic users \
             --bootstrap-server kafka:29092 \
@@ -176,7 +159,7 @@ For more details please see the [quick start](https://docs.confluent.io/current/
 
     ```bash
     $ docker container run -it --rm \
-        --network demo_demo-net \
+        --network ksql-quickstart_demo-net \
         confluentinc/cp-enterprise-kafka:4.1.0 kafka-console-producer \
             --topic t1 \
             --broker-list kafka:29092 \
@@ -198,7 +181,7 @@ For more details please see the [quick start](https://docs.confluent.io/current/
 
     ```bash
     $ docker container run -it --rm \
-        --network demo_demo-net \
+        --network ksql-quickstart_demo-net \
         confluentinc/cp-enterprise-kafka:4.1.0 kafka-console-producer \
             --topic t2 \
             --broker-list kafka:29092  \
@@ -222,7 +205,7 @@ For more details please see the [quick start](https://docs.confluent.io/current/
 
     ```bash
     $ docker container run -it --rm \
-        --network demo_demo-net \
+        --network ksql-quickstart_demo-net \
         confluentinc/cp-enterprise-kafka:4.1.0 kafka-topics \
             --zookeeper zookeeper:32181 \
             --list
@@ -230,8 +213,9 @@ For more details please see the [quick start](https://docs.confluent.io/current/
 
 ## Cleanup
 
-1. Tear down the stack:
+1. Tear down the application and free resources:
 
     ```bash
-    $ docker stack rm demo
+    $ docker-compose down
+    $ docker volume prune -f
     ```

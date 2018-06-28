@@ -18,12 +18,12 @@ client.connect().then(()=>{
 exports.addHistoricData = async function(){
     console.log('Adding historical data');
     const sql = "INSERT INTO readings(station_id, reading_date, temperature, wind_speed, wind_direction) VALUES($1,$2,$3,$4,$5);";
-    var result = await client.query("SELECT station_id FROM stations");
+    var result = await client.query("SELECT id FROM stations");
     var stations = result.rows;
     var now = moment();
     var dt0 = now.subtract(1000, "minutes");
     for(var s=0; s<stations.length; s++){
-        var stationId = stations[s].station_id;
+        var stationId = stations[s].id;
         console.log('Adding data for station ' + stationId);
         var t0 = Math.random() * 20 - 10;
         var ws0 = Math.random() * 100;

@@ -2,6 +2,10 @@
 
 ## Running the Pipeline
 
+Navigate to the demo app folder:
+
+    $ cd ~/confluent-labs/module-03/ksql-etl
+
 Run all containers/services. This includes:
 
 * Zookeeper
@@ -15,11 +19,13 @@ Run all containers/services. This includes:
 $ docker-compose up -d
 ```
 
-to interactively work with the DB:
+to interactively work with the DB (use password: `weatherapp123`):
 
 ```bash
-$ docker run --rm -it --net ksql-etl_ksql-net postgres:10.2-alpine \
-    psql -d weather -U weatherapp -h weather-db
+$ docker run --rm -it \
+    --net ksql-etl_ksql-net \
+    postgres:10.2-alpine \
+        psql -d weather -U weatherapp -h weather-db
 ```
 
 e.g. add a station:
@@ -30,6 +36,8 @@ weather=# INSERT INTO stations(name, lattitude, longitude, elevation)
 ```
 
 ## List all Connectors
+
+In a different terminal window navigate to the project folder and execute the following command:
 
 ```bash
 $ docker-compose exec kafka-connect \
@@ -78,9 +86,11 @@ Define JDBC Source Connector to our `weather-db` Postgres database:
 $ docker-compose exec kafka-connect \
     curl -s -X POST \
         -H "Content-Type: application/json" \
-        --data '{ "name": "weatherapp-source", "config": { "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector", "tasks.max": 1, "connection.url": "jdbc:postgresql://weather-db:5432/weather?user=weatherapp&password=weatherapp123", "table.whitelist": "stations", "mode": "incrementing", "incrementing.column.name": "id", "topic.prefix": "postgres-" }}' \
+        --data '{ "name": "weatherapp-source", "config": { "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector", "tasks.max": 1, "connection.url": "jdbc:postgresql://weather-db:5432/weather?user=weatherapp&password=weatherapp123", "table.whitelist": "stations,readings", "mode": "incrementing", "incrementing.column.name": "id", "topic.prefix": "postgres-" }}' \
         http://kafka-connect:8082/connectors
 ```
+
+Note that the above configures a **whitelist** containing the tables `stations` and `readings` to be imported into Kafka.
 
 Test status of connector :
 
@@ -88,6 +98,7 @@ Test status of connector :
 $ docker-compose exec kafka-connect \
     curl -s -X GET http://kafka-connect:8082/connectors/weatherapp-source/status
 ```
+
 Test if data arrived in Kafka:
 
 ```bash
@@ -122,14 +133,69 @@ ksql> SET 'auto.offset.reset' = 'earliest';
 Create a stream:
 
 ```sql
-ksql> CREATE STREAM stations(station_id bigint, name string, longitude double, lattitude double, elevation double) \
-        WITH (kafka_topic='postgres-stations', value_format='AVRO', key='station_id');
+ksql> CREATE STREAM stations(\
+        id bigint, \
+        name string, \
+        longitude integer, \
+        lattitude integer, \
+        elevation integer) \
+        WITH (kafka_topic='postgres-stations', value_format='AVRO', key='id');
+```
+
+```sql
+ksql> CREATE STREAM readings(\
+        id bigint, \
+        station_id bigint, \
+        reading_date string, \
+        temperature double, \
+        wind_speed double, \
+        wind_direction integer) \
+        WITH (kafka_topic='postgres-readings', value_format='AVRO', key='id');
 ```
 
 Can we access the data?
 
 ```sql
 ksql> SELECT * FROM stations LIMIT 3;
+1530177293626 | null | 1 | Antarctica 1 | 85 | 0 | 2240
+1530177293626 | null | 2 | Antarctica 2 | 87 | 90 | 1785
+1530177293626 | null | 3 | Antarctica 3 | 92 | 180 | 2550
+```
+
+```sql
+sql> select * from readings limit 10;
+1530177293127 | null | 1 | 1 | 1530117308548 | -1.5306066274642944 | 24.87377166748047 | -4
+1530177293127 | null | 2 | 1 | 1530117368548 | -0.8072234392166138 | 25.82440757751465 | -3
+1530177293127 | null | 3 | 1 | 1530117428548 | -1.0869826078414917 | 25.181835174560547 | -4
+1530177293128 | null | 4 | 1 | 1530117488548 | -1.1630247831344604 | 25.817140579223633 | -2
+1530177293128 | null | 5 | 1 | 1530117548548 | -1.190529704093933 | 25.372943878173828 | -2
+1530177293128 | null | 6 | 1 | 1530117608548 | -1.5277445316314697 | 24.925884246826172 | -2
+1530177293128 | null | 7 | 1 | 1530117668548 | -1.3878551721572876 | 25.057619094848633 | -3
+1530177293128 | null | 8 | 1 | 1530117728548 | -0.9681357145309448 | 25.31396484375 | -2
+1530177293128 | null | 9 | 1 | 1530117788548 | -1.1543512344360352 | 25.040143966674805 | -4
+1530177293128 | null | 10 | 1 | 1530117848548 | -0.6620040535926819 | 25.789499282836914 | -3
+LIMIT reached for the partition.
+Query terminated
+```
+
+Create some aggregates:
+
+```sql
+select station_id, \
+    max(temperature) as max, \
+    min(temperature) min, \
+    count(*) count \
+from readings \
+group by station_id;
+```
+
+resulting in something like this:
+
+```bash
+1 | -0.5405425429344177 | -1.5382883548736572 | 507
+1 | -0.5387284159660339 | -1.5382883548736572 | 1000
+2 | -3.429884672164917 | -4.429297924041748 | 1000
+3 | 4.804220676422119 | 3.8066322803497314 | 1000
 ```
 
 ## Create a topic in Kafka
@@ -148,7 +214,10 @@ $ docker-compose exec kafka kafka-topics --create \
 Describe the topic:
 
 ```bash
-$ docker-compose exec kafka kafka-topics --describe --topic test-topic --zookeeper zookeeper:32181
+$ docker-compose exec kafka kafka-topics \
+    --describe \
+    --topic test-topic \
+    --zookeeper zookeeper:32181
 ```
 
 Create some data in the topic:
@@ -207,7 +276,7 @@ $ docker-compose exec kafka-connect kafka-avro-console-consumer \
     --topic t1 \
     --property schema.registry.url=http://schema-registry:8081 \
     --from-beginning \
-    --max-messages 10
+    --max-messages 5
 ```
 
 ### Schema with two fields.
@@ -242,5 +311,5 @@ $ docker-compose exec kafka-connect kafka-avro-console-consumer \
     --topic t2 \
     --property schema.registry.url=http://schema-registry:8081 \
     --from-beginning \
-    --max-messages 10
+    --max-messages 5
 ```
