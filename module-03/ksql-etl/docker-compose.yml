@@ -1,0 +1,91 @@
+version: "3.5"
+services:
+  weather-db:
+    build: 
+      context: weather-db
+    image: weather-db
+    networks:
+      - ksql-net
+  weather-app:
+    build: 
+      context: weather-app
+    image: weather-app
+    networks:
+      - ksql-net
+
+  zookeeper:
+    image: "confluentinc/cp-zookeeper:4.1.1"
+    networks:
+      - ksql-net
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: "confluentinc/cp-enterprise-kafka:4.1.1"
+    networks:
+      - ksql-net
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:32181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  schema-registry:
+    image: "confluentinc/cp-schema-registry:4.1.1"
+    networks:
+      - ksql-net
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:32181
+      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
+
+  ksql-server:
+    image: "confluentinc/ksql-cli:4.1.0"
+    networks:
+      - ksql-net
+    command: "bash -c 'echo Waiting for Kafka to be ready... && \
+                       cub kafka-ready -b kafka:9092 1 20 && \
+                       echo Waiting for Confluent Schema Registry to be ready... && \
+                       cub sr-ready schema-registry 8081 20 && \
+                       echo Waiting a few seconds for topic creation to finish... && \
+                       sleep 2 && \
+                       /usr/bin/ksql-server-start /etc/ksql/ksql-server.properties'"
+    environment:
+      KSQL_CONFIG_DIR: "/etc/ksql"
+      KSQL_OPTS: "-Dbootstrap.servers=kafka:9092 -Dksql.schema.registry.url=http://schema-registry:8081 -Dlisteners=http://0.0.0.0:8088"
+      KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties"
+
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:4.1.1
+    networks:
+      - ksql-net
+    volumes:
+      - ./files:/files
+    environment:
+      CONNECT_PRODUCER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
+      CONNECT_CONSUMER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
+      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
+      CONNECT_REST_PORT: 8082
+      CONNECT_GROUP_ID: "weatherapp"
+      CONNECT_CONFIG_STORAGE_TOPIC: "weatherapp-config"
+      CONNECT_OFFSET_STORAGE_TOPIC: "weatherapp-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "weatherapp-status"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: "io.confluent.connect.avro.AvroConverter"
+      CONNECT_VALUE_CONVERTER: "io.confluent.connect.avro.AvroConverter"
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "kafka-connect"
+      CONNECT_LOG4J_ROOT_LOGLEVEL: WARN
+      CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
+      CONNECT_PLUGIN_PATH: /usr/share/java
+      CONNECT_REST_HOST_NAME: "kafka-connect"
+
+networks:
+  ksql-net:

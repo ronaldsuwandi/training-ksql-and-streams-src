@@ -1,0 +1,54 @@
+:imagesdir: ./images
+:source-highlighter: rouge
+:icons: font
+
+= KSQL & Kafka Streams Exercises
+Sample Solutions - Version 5.0.0-v1
+
+== Cloning the Repository
+
+. Clone this repository into a folder `~/confluent-labs` on your computer:
+
+    $ git clone https://github.com/confluentinc/training-ksql-and-streams-src.git ~/confluent-labs
+
+. Navigate to this folder:
+
+    $ cd ~/confluent-labs
+
+. Optional: Open this folder in your favorite code editor; e.g. if you have *VS Code* installed then:
+
+    $ code .
+
+NOTE: For each module of the course that has exercises we have a corresponding sub-folder `module-xx` in this repository. In this subfolder we find a working sample solution for each exercise.
+
+== Java base Exercises using Gradle
+
+To build a project Java project using *Gradle* do the following:
+
+1. `cd` into the corresponding project folder (the folder where the *Gradle* build file `build.gradle` is located).
+
+2. Run this command to build the `jar`:
++
+----
+$ docker run -it --rm \
+    -v "$PWD":/usr/src/app \
+    -v "$HOME"/.m2:/root/.m2 \
+    -w /usr/src/app \
+    maven:3.5.3-jdk-8-alpine mvn clean install
+----
+
+3. Run the application:
++
+----
+$ docker container run --rm \
+    -v $(PWD)/target/<jar-name>-<version>.jar:/app.jar \
+    openjdk:8-jre-alpine java -jar /app.jar
+----
++
+NOTE: Sometimes the Alpine based image is not working depending on the dependencies used. In this case use this  command instead:
++
+----
+$ docker container run --rm \
+    -v $(PWD)/target/<jar-name>-<version>.jar:/app.jar \
+    openjdk:8-jre java -jar /app.jar
+----
