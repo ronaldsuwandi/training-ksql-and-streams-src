@@ -5,6 +5,8 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.LongSerializer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.Stores;
 import org.apache.kafka.streams.Topology;
@@ -12,8 +14,6 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.processor.Processor;
 
 import org.apache.kafka.streams.TopologyTestDriver;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.streams.test.ConsumerRecordFactory;
 import org.apache.kafka.streams.test.OutputVerifier;
 
@@ -50,25 +50,30 @@ public class ProcessorTest {
     public void tearDown() {
         testDriver.close();
     }
-    
+
     @Test
     public void shouldFlushStoreForFirstInput() {
-        // recordFactory.create("<topic-name>", "<key>", <value>, <timestamp>)
-        ConsumerRecord<byte[],byte[]> inputRecord = recordFactory.create("input-topic", "a", 1L, 9999L);
+        // TODO: add test code here
+        ConsumerRecord<byte[],byte[]> inputRecord = 
+            recordFactory.create("input-topic", "a", 1L, 9999L);
         testDriver.pipeInput(inputRecord);
-        ProducerRecord<String, Long> outputRecord = testDriver.readOutput("result-topic", stringDeserializer, longDeserializer);
+        ProducerRecord<String, Long> outputRecord = 
+            testDriver.readOutput("result-topic", stringDeserializer, longDeserializer);
         OutputVerifier.compareKeyValue(outputRecord, "a", 21L);
-        // make sure there is no more output available...
-        Assert.assertNull(testDriver.readOutput("result-topic", stringDeserializer, longDeserializer));
+        Assert.assertNull(testDriver.readOutput(
+            "result-topic", stringDeserializer, longDeserializer));
     }
-    
+
     @Test
     public void shouldNotUpdateStoreForSmallerValue() {
         testDriver.pipeInput(recordFactory.create("input-topic", "a", 1L, 9999L));
         Assert.assertThat(store.get("a"), equalTo(21L));
-        OutputVerifier.compareKeyValue(testDriver.readOutput("result-topic", stringDeserializer, longDeserializer), "a", 21L);
-        Assert.assertNull(testDriver.readOutput("result-topic", stringDeserializer, longDeserializer));
+        OutputVerifier.compareKeyValue(testDriver.readOutput(
+            "result-topic", stringDeserializer, longDeserializer), "a", 21L);
+        Assert.assertNull(testDriver.readOutput(
+            "result-topic", stringDeserializer, longDeserializer));
     }
+
     
     @Test
     public void shouldUpdateStoreForLargerValue() {
