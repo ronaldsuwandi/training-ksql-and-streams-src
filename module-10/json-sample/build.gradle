@@ -26,8 +26,8 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile group: "org.slf4j", name: "slf4j-log4j12", version: "1.7.25"
     compile group: "org.apache.kafka", name: "kafka-clients", version: "1.1.0"
     compile group: "org.apache.kafka", name: "kafka-streams", version: "1.1.0"
     compile group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.9.5"
 }
+

@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
@@ -19,6 +16,7 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.Predicate;
 
 
 public class JsonSample {
@@ -33,9 +31,6 @@ public class JsonSample {
     }
 
     public static void main(String[] args) {
-        Logger logger = LoggerFactory.getLogger(JsonSample.class);
-        logger.info("Starting the Kafka Stream Application");
-
         System.out.printf("*** Starting %s Application ***%n", APPLICATION_NAME);
 
         StreamsConfig config = getConfig();
@@ -48,29 +43,27 @@ public class JsonSample {
     private static Topology getTopology(){
         StreamsBuilder builder = new StreamsBuilder();
 
-        // here is the logic
         final Serde<String> stringSerde = Serdes.String();
         final Serde<TempReading> temperatureSerde = getJsonSerde();
 
+        // TODO: here we construct the Kafka Streams topology
         builder.stream("temperatures-topic", Consumed.with(stringSerde, temperatureSerde))
-            .filter(((key,value) -> value > 25))
-            .to("high-temperatures-topic", Produced.with(stringSerde, temperatureSerde));;
+            .filter((key,value) -> value.temperature > 25)
+            .to("high-temperatures-topic", Produced.with(stringSerde, temperatureSerde));
 
         Topology topology = builder.build();
         return topology;
     }
 
     private static Serde<TempReading> getJsonSerde(){
+        // TODO: create the JSON serde
         Map<String, Object> serdeProps = new HashMap<>();
-
         final Serializer<TempReading> temperatureSerializer = new JsonPOJOSerializer<>();
         serdeProps.put("JsonPOJOClass", TempReading.class);
         temperatureSerializer.configure(serdeProps, false);
-
         final Deserializer<TempReading> temperatureDeserializer = new JsonPOJODeserializer<>();
         serdeProps.put("JsonPOJOClass", TempReading.class);
         temperatureDeserializer.configure(serdeProps, false);
-
         return Serdes.serdeFrom(temperatureSerializer, temperatureDeserializer);
     }
 
