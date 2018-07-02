@@ -3,13 +3,13 @@ package streams;
 import java.util.Properties;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.state.Stores;
+import org.apache.kafka.clients.producer.ProducerConfig;
 
 public class ProcessorSample {
     final static String APPLICATION_ID = "processor-sample-v0.1.0";
@@ -36,6 +36,7 @@ public class ProcessorSample {
                 Serdes.Integer()),
                 "Process");
         builder.addSink("Sink", "word-count-topic", "Process");
+
         return builder;
     }
 
@@ -48,13 +49,10 @@ public class ProcessorSample {
         settings.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
         settings.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-        // Interceptor configuration
         settings.put(StreamsConfig.PRODUCER_PREFIX + ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
             "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor");
         settings.put(StreamsConfig.CONSUMER_PREFIX + ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG,
             "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor");
-
         StreamsConfig config = new StreamsConfig(settings);
         return config;        
     }

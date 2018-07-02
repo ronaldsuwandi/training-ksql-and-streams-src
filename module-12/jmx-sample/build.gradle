@@ -4,7 +4,7 @@ plugins {
   id 'application'
 }
 
-mainClassName = 'io.confluent.training.streams.WordCountSample'
+mainClassName = 'streams.MapSample'
 
 repositories {
     mavenCentral()
@@ -12,13 +12,13 @@ repositories {
 }
 
 shadowJar {
-   baseName = 'wordcount-sample'
+   baseName = 'map-sample'
    classifier = null
    version = '0.1.0'
 }
 
 jar {
-    baseName = 'wordcount-sample'
+    baseName = 'map-sample'
     version =  '0.1.0'
 }
 
@@ -29,3 +29,4 @@ dependencies {
     compile group: "org.apache.kafka", name: "kafka-clients", version: "1.1.0"
     compile group: "org.apache.kafka", name: "kafka-streams", version: "1.1.0"
 }
+
