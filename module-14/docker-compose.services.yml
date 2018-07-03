@@ -1,17 +1,14 @@
 version: "3.5"
 services:
   producer:
-    image: temp-producer:latest
-    build: temp-producer
+    image: temp-producer-python:latest
     networks:
       - streams-net
-
+  
   streams-app:
     image: streams-app:latest
-    build: streams-app
     networks:
       - streams-net
 
 networks:
   streams-net:
-    # external: true

@@ -12,13 +12,13 @@ public class TempProducer {
     public static void main(String[] args) throws InterruptedException{
         System.out.println("*** Starting Temp Producer");
         Properties props = getConfig();
-        KafkaProducer<String, Integer> producer = new KafkaProducer<>(props);
+        KafkaProducer<String, String> producer = new KafkaProducer<>(props);
         setupShutdownHook(producer);
 
         produceTemperatures(producer);
     }
 
-    private static void produceTemperatures(KafkaProducer<String, Integer> producer) throws InterruptedException
+    private static void produceTemperatures(KafkaProducer<String, String> producer) throws InterruptedException
     {
         final Random random = new Random();
         final String topic = "temperature-readings";
@@ -44,7 +44,9 @@ public class TempProducer {
             }
             Integer temperature = lastTemperature[stationIndex] + delta;
             lastTemperature[stationIndex] = temperature;
-            ProducerRecord<String, Integer> rec = new ProducerRecord<>(topic, station, temperature);
+            // create a JSON string
+            String value = "{ 'station': '" + station + "', 'temperature': " + temperature.toString() + "}";
+            ProducerRecord<String, String> rec = new ProducerRecord<>(topic, station, value);
             epoch_time += 1000;         // add one second to simulate one reading per second...
 
             System.out.println("The record is: " + rec.key() + ", " + rec.value());
@@ -62,7 +64,7 @@ public class TempProducer {
         return props;
     }
 
-    private static void setupShutdownHook(KafkaProducer<String, Integer> producer){
+    private static void setupShutdownHook(KafkaProducer<String, String> producer){
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("### Stopping Temp Producer");
             producer.close();

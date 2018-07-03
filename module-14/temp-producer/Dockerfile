@@ -1,5 +1,9 @@
-FROM python:3.6.5-slim-stretch
-WORKDIR /app
-RUN pip install confluent-kafka
+FROM gradle:4.8.0-jdk8 AS builder
+RUN mkdir -p /home/gradle/project/.gradle 
+WORKDIR /home/gradle/project
 COPY . .
-CMD python main.py 
+RUN gradle build
+
+FROM openjdk:8-jre
+COPY --from=builder /home/gradle/project/build/libs/temp-producer-0.1.0.jar /app.jar
+CMD ["java", "-jar", "/app.jar"]

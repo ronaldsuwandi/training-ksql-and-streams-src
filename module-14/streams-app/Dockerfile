@@ -1,4 +1,4 @@
-FROM gradle:4.8.0-jdk8-alpine AS builder
+FROM gradle:4.8.0-jdk8 AS builder
 RUN mkdir -p /home/gradle/project/.gradle 
 WORKDIR /home/gradle/project
 COPY . .

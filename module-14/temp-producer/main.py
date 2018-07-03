@@ -1,5 +1,6 @@
 import random
 import time
+import json
 
 from confluent_kafka import Producer
 
@@ -35,11 +36,15 @@ while True:
         delta = -delta
     temperature = lastTemperature[stationIndex] + delta
     lastTemperature[stationIndex] = temperature
-    msg_value = temperature.to_bytes(4, byteorder='big', signed=True)
+    # msg_value = temperature.to_bytes(4, byteorder='big', signed=True)
+    msg_value = json.dumps({
+        "station": station,
+        "temperature": temperature
+    })
     epoch_time += 1   # add one second to simulate one reading per second...
     timestamp = int(epoch_time * 1000)   # convert to milli-seconds
 
-    print(station + ", " + str(temperature))
+    print(station + ", " + msg_value)   #str(temperature))
     p.produce(topic, key=station, value=msg_value, timestamp=timestamp)     #, callback=delivery_report)
 
     time.sleep(0.1)     # sleep 100 ms
