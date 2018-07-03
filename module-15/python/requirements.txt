@@ -1,2 +1,2 @@
-confluent-kafka
+confluent_kafka
 requests
