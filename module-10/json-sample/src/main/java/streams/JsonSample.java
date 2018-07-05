@@ -10,14 +10,12 @@ import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.Consumed;
 import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
-import org.apache.kafka.streams.kstream.Predicate;
-
+import io.confluent.kafka.serializers.KafkaJsonSerializer;
+import io.confluent.kafka.serializers.KafkaJsonDeserializer;
 
 public class JsonSample {
     final static String APPLICATION_ID = "json-sample-v0.1.0";
@@ -58,12 +56,14 @@ public class JsonSample {
     private static Serde<TempReading> getJsonSerde(){
         // TODO: create the JSON serde
         Map<String, Object> serdeProps = new HashMap<>();
-        final Serializer<TempReading> temperatureSerializer = new JsonPOJOSerializer<>();
-        serdeProps.put("JsonPOJOClass", TempReading.class);
+        serdeProps.put("json.value.type", TempReading.class);
+
+        final Serializer<TempReading> temperatureSerializer = new KafkaJsonSerializer<>();
         temperatureSerializer.configure(serdeProps, false);
-        final Deserializer<TempReading> temperatureDeserializer = new JsonPOJODeserializer<>();
-        serdeProps.put("JsonPOJOClass", TempReading.class);
+                
+        final Deserializer<TempReading> temperatureDeserializer = new KafkaJsonDeserializer<>();
         temperatureDeserializer.configure(serdeProps, false);
+
         return Serdes.serdeFrom(temperatureSerializer, temperatureDeserializer);
     }
 
