@@ -1,6 +1,5 @@
 package io.confluent.training.streams;
 
-import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.common.serialization.LongDeserializer;
@@ -8,10 +7,7 @@ import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.streams.state.KeyValueStore;
-import org.apache.kafka.streams.state.Stores;
 import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.processor.Processor;
 
 import org.apache.kafka.streams.TopologyTestDriver;
 import org.apache.kafka.streams.test.ConsumerRecordFactory;
@@ -20,7 +16,6 @@ import org.apache.kafka.streams.test.OutputVerifier;
 import java.util.*;
 
 import org.junit.*;
-import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 public class ProcessorTest {
