@@ -1,28 +1,32 @@
 package io.confluent.training.streams;
 
-import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
-
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.common.serialization.LongDeserializer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.common.utils.Time;
 import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.integration.utils.EmbeddedKafkaCluster;
+import org.apache.kafka.streams.integration.utils.IntegrationTestUtils;
 import org.apache.kafka.test.TestUtils;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
-import org.junit.*;
-import static org.junit.Assert.*;
 import static org.assertj.core.api.Assertions.assertThat; 
 
 public class TopologyProviderTest {
     @ClassRule
-    public static final EmbeddedSingleNodeKafkaCluster CLUSTER = new EmbeddedSingleNodeKafkaCluster();
+    public static final EmbeddedKafkaCluster CLUSTER = new EmbeddedKafkaCluster(1);
 
     private static final String inputTopic = "lines-topic";
     private static final String outputTopic = "word-count-topic";
@@ -89,7 +93,8 @@ public class TopologyProviderTest {
       producerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
       producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
       producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-      IntegrationTestUtils.produceValuesSynchronously(inputTopic, inputValues, producerConfig);
+      IntegrationTestUtils.produceValuesSynchronously(
+        inputTopic, inputValues, producerConfig, Time.SYSTEM);
     }
 
     private void verifyOutputData(KafkaStreams streams) throws Exception {
