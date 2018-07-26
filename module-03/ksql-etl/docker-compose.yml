@@ -23,6 +23,8 @@ services:
 
   kafka:
     image: "confluentinc/cp-enterprise-kafka:5.0.0-rc3"
+    depends_on:
+      - zookeeper
     networks:
       - ksql-net
     environment:
@@ -30,10 +32,16 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka:9092"
 
   schema-registry:
     image: "confluentinc/cp-schema-registry:5.0.0-rc3"
+    depends_on:
+      - zookeeper
+      - kafka
     networks:
       - ksql-net
     environment:
@@ -42,7 +50,12 @@ services:
       SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
 
   ksql-server:
-    image: "confluentinc/cp-ksql-server:5.0.0-beta30"
+    image: "confluentinc/cp-ksql-server:5.0.0-rc3"
+    depends_on:
+      - kafka
+      - connect
+    ports:
+      - "8088:8088"
     networks:
       - ksql-net
     environment:
@@ -59,14 +72,20 @@ services:
       KSQL_KSQL_SERVER_UI_ENABLED: "false"
 
   ksql-cli:
-    image: confluentinc/cp-ksql-cli:5.0.0-beta30
+    image: confluentinc/cp-ksql-cli:5.0.0-rc3
     networks:
       - ksql-net
     entrypoint: /bin/sh
     tty: true
 
-  kafka-connect:
+  connect:
     image: confluentinc/cp-kafka-connect:5.0.0-rc3
+    depends_on:
+      - zookeeper
+      - kafka
+      - schema-registry
+    ports:
+      - "8083:8083"
     networks:
       - ksql-net
     volumes:
@@ -75,11 +94,12 @@ services:
       CONNECT_PRODUCER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
       CONNECT_CONSUMER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
       CONNECT_BOOTSTRAP_SERVERS: kafka:9092
-      CONNECT_REST_PORT: 8082
-      CONNECT_GROUP_ID: "weatherapp"
-      CONNECT_CONFIG_STORAGE_TOPIC: "weatherapp-config"
-      CONNECT_OFFSET_STORAGE_TOPIC: "weatherapp-offsets"
-      CONNECT_STATUS_STORAGE_TOPIC: "weatherapp-status"
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: "connect"
+      CONNECT_CONFIG_STORAGE_TOPIC: "connect-config"
+      CONNECT_OFFSET_STORAGE_TOPIC: "connect-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "connect-status"
+      CONNECT_REPLICATION_FACTOR: 1
       CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
@@ -89,17 +109,21 @@ services:
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
       CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
       CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-      CONNECT_REST_ADVERTISED_HOST_NAME: "kafka-connect"
-      CONNECT_LOG4J_ROOT_LOGLEVEL: WARN
+      CONNECT_REST_ADVERTISED_HOST_NAME: "connect"
+      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
       CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
       CONNECT_PLUGIN_PATH: /usr/share/java
-      CONNECT_REST_HOST_NAME: "kafka-connect"
+      CONNECT_REST_HOST_NAME: "connect"
 
   control-center:
-    image: confluentinc/cp-enterprise-control-center:5.0.0-beta30-1
+    image: confluentinc/cp-enterprise-control-center:5.0.0-rc3
+    depends_on:
+      - zookeeper
+      - kafka
+      - connect
     restart: always
     networks:
-      - streams-net
+      - ksql-net
     ports:
       - "9021:9021"
     environment:
@@ -112,7 +136,10 @@ services:
       CONTROL_CENTER_METRICS_TOPIC_REPLICATION: 1
       CONTROL_CENTER_STREAMS_NUM_STREAM_THREADS: 1
       CONTROL_CENTER_STREAMS_CONSUMER_REQUEST_TIMEOUT_MS: "960032"
-      CONTROL_CENTER_KSQL_ENDPOINT: "http://ksql-server:8088"
+      CONTROL_CENTER_CONNECT_CLUSTER: "connect:8083"
+      CONTROL_CENTER_KSQL_URL: "http://ksql-server:8088"
+      CONTROL_CENTER_KSQL_ADVERTISED_URL: "http://localhost:8088"
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: "https://schemaregistry:8081"
 
 networks:
   ksql-net:
