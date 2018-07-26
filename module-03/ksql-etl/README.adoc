@@ -1,0 +1,320 @@
+= Kafka ETL Pipeline
+
+== Running the Pipeline
+
+. Navigate to the demo app folder:
+
+    $ cd ~/confluent-labs/module-03/ksql-etl
+
+. Run all containers/services
++
+```bash
+$ docker-compose up -d
+```
++
+This includes:
++
+* Zookeeper
+* Kafka Broker
+* Schema Registry
+* Kafka Connect
+* Confluent Control Center
+* Weather App
+* Weather DB
+
+. To interactively work with the DB (use password: `weatherapp123`):
++
+```bash
+$ docker run --rm -it \
+    --net ksql-etl_ksql-net \
+    postgres:10.2-alpine \
+        psql -d weather -U weatherapp -h weather-db
+```
++
+e.g. add a station:
++
+```sql
+weather=# INSERT INTO stations(name, lattitude, longitude, elevation)
+            VALUES('Antartica 4', 270, 85, 2130);
+```
+
+== Add a JDBC Source connector using C3
+
+. Open C3 at http://localhost:9021
+. Navigate to **Kafka Connect**
+. Add a new *Source* connector with the following settings:
+.. Connector Class: `io.confluent.connect.jdbc.JdbcSourceConnector`
+.. Name: `weatherapp-source`
+.. Tasks: `1`
+.. JDBC URL: `jdbc:postgresql://weather-db:5432/weather`
+.. JDBC User: `weatherapp`
+.. JDBC Password: `weatherapp123`
+.. Table Whitelist: `stations`, `readings`
+.. Table Loading Mode: `incrementing`
+.. Incrementing Column Name: `id`
+. Click *Continue* and then *Save&Finish*
+
+== Configure Connect from the Command Line
+Alternatively we can also configure the connectors using the command line.
+
+=== List all Connectors
+
+In a different terminal window navigate to the project folder and execute the following command:
+
+```bash
+$ docker-compose exec connect \
+    curl connect:8083/connector-plugins | jq
+```
+
+=== Add a JDBC Source Connector
+
+. Define JDBC Source Connector to our `weather-db` Postgres database: 
++
+[source,bash]
+----
+$ docker-compose exec connect \
+    curl -s -X POST \
+        -H "Content-Type: application/json" \
+        --data '{ "name": "weatherapp-source", "config": { "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector", "tasks.max": 1, "connection.url": "jdbc:postgresql://weather-db:5432/weather?user=weatherapp&password=weatherapp123", "table.whitelist": "stations,readings", "mode": "incrementing", "incrementing.column.name": "id", "topic.prefix": "postgres-" }}' \
+        http://connect:8083/connectors
+----
++
+NOTE: The above configures a **whitelist** containing the tables `stations` and `readings` to be imported into Kafka.
+
+. Test status of connector :
++
+[source,bash]
+----
+$ docker-compose exec connect \
+    curl -s -X GET http://connect:8083/connectors/weatherapp-source/status | jq
+----
++
+Which should give something like this:
++
+[source, json]
+----
+{
+  "name": "weatherapp-source",
+  "connector": {
+    "state": "RUNNING",
+    "worker_id": "connect:8083"
+  },
+  "tasks": [
+    {
+      "state": "RUNNING",
+      "id": 0,
+      "worker_id": "connect:8083"
+    }
+  ],
+  "type": "source"
+}
+----
+
+. Test if data (encoded in Avro) arrived in Kafka:
++
+[source,bash]
+----
+$ docker-compose exec connect kafka-avro-console-consumer \
+        --bootstrap-server kafka:9092 \
+        --property schema.registry.url=http://schema-registry:8081 \
+        --topic postgres-stations \
+        --from-beginning \
+        --max-messages 3
+----
+
+== Running KSQL CLI
+
+. Run the KSQL CLI:
++
+```bash
+$ docker-compose exec ksql-cli ksql http://ksql-server:8088
+```
+
+. Set offset to **earliest**:
++
+```bash
+ksql> SET 'auto.offset.reset' = 'earliest';
+```
+
+. Create a table from `stations` and a stream from `readings`:
++
+```sql
+ksql> CREATE TABLE stations \
+        WITH (kafka_topic='postgres-stations', value_format='AVRO', key='id');
+```
++
+```sql
+ksql> CREATE STREAM readings \
+        WITH (kafka_topic='postgres-readings', value_format='AVRO', key='id');
+```
+
+. Can we access the data?
++
+```sql
+ksql> SELECT * FROM stations LIMIT 3;
+1530177293626 | null | 1 | Antarctica 1 | 85 | 0 | 2240
+1530177293626 | null | 2 | Antarctica 2 | 87 | 90 | 1785
+1530177293626 | null | 3 | Antarctica 3 | 92 | 180 | 2550
+```
++
+```sql
+sql> select * from readings limit 10;
+1530177293127 | null | 1 | 1 | 1530117308548 | -1.5306066274642944 | 24.87377166748047 | -4
+1530177293127 | null | 2 | 1 | 1530117368548 | -0.8072234392166138 | 25.82440757751465 | -3
+1530177293127 | null | 3 | 1 | 1530117428548 | -1.0869826078414917 | 25.181835174560547 | -4
+1530177293128 | null | 4 | 1 | 1530117488548 | -1.1630247831344604 | 25.817140579223633 | -2
+1530177293128 | null | 5 | 1 | 1530117548548 | -1.190529704093933 | 25.372943878173828 | -2
+1530177293128 | null | 6 | 1 | 1530117608548 | -1.5277445316314697 | 24.925884246826172 | -2
+1530177293128 | null | 7 | 1 | 1530117668548 | -1.3878551721572876 | 25.057619094848633 | -3
+1530177293128 | null | 8 | 1 | 1530117728548 | -0.9681357145309448 | 25.31396484375 | -2
+1530177293128 | null | 9 | 1 | 1530117788548 | -1.1543512344360352 | 25.040143966674805 | -4
+1530177293128 | null | 10 | 1 | 1530117848548 | -0.6620040535926819 | 25.789499282836914 | -3
+LIMIT reached for the partition.
+Query terminated
+```
+
+. Create some aggregates:
++
+```sql
+select station_id, \
+    max(temperature) as max, \
+    min(temperature) min, \
+    count(*) count \
+from readings \
+group by station_id;
+```
++
+resulting in something like this:
++
+```bash
+1 | -0.5405425429344177 | -1.5382883548736572 | 507
+1 | -0.5387284159660339 | -1.5382883548736572 | 1000
+2 | -3.429884672164917 | -4.429297924041748 | 1000
+3 | 4.804220676422119 | 3.8066322803497314 | 1000
+```
+
+== Create a topic in Kafka with Format DELIMITED
+
+. Create the topic:
++
+```bash
+$ docker-compose exec kafka kafka-topics --create \
+      --topic test-topic \
+      --partitions 1 \
+      --replication-factor 1 \
+      --if-not-exists \
+      --zookeeper zookeeper:2181
+```
+
+. Describe the topic:
++
+```bash
+$ docker-compose exec kafka kafka-topics \
+    --describe \
+    --topic test-topic \
+    --zookeeper zookeeper:2181
+```
+
+. Create some data in the topic:
++
+```bash
+$ docker-compose exec kafka /bin/sh -c 'echo "Hello from Kafka test-topic" | kafka-console-producer --broker-list kafka:9092 --topic test-topic'
+```
+
+. Read the data in the topic:
++
+```bash
+$ docker-compose exec kafka kafka-console-consumer \
+    --bootstrap-server kafka:9092 \
+    --topic test-topic \
+    --from-beginning
+```
+
+. In KSQL create a stream:
++
+```sql
+ksql> CREATE STREAM test(message string) \
+        WITH (kafka_topic='test-topic', value_format='DELIMITED');
+```
+
+== Kafka Avro
+
+=== Avro Schema with one field.
+
+. Create some data:
++
+```bash
+$ docker-compose exec connect sh -c 'cat << EOF | kafka-avro-console-producer \
+    --broker-list kafka:9092 \
+    --topic t1 \
+    --property schema.registry.url=http://schema-registry:8081 \
+    --property value.schema="{\"type\":\"record\",\"name\":\"myrecord\",\"fields\":[{\"name\":\"f1\",\"type\":\"string\"}]}"
+{"f1": "value1"}
+{"f1": "value2"}
+{"f1": "value3"}
+{"f1": "value4"}
+{"f1": "value5"}
+EOF'
+```
+
+. Now show the values:
++
+```bash
+$ docker-compose exec connect kafka-avro-console-consumer \
+    --bootstrap-server kafka:9092 \
+    --topic t1 \
+    --property schema.registry.url=http://schema-registry:8081 \
+    --from-beginning \
+    --max-messages 5
+```
++
+which should give this:
++
+```bash
+{"f1":"value1"}
+{"f1":"value2"}
+{"f1":"value3"}
+{"f1":"value4"}
+{"f1":"value5"}
+Processed a total of 5 messages
+```
+
+=== Avro Schema with two fields.
+
+. Create some data:
++
+```bash
+$ docker-compose exec connect sh -c 'cat << EOF | kafka-avro-console-producer \
+    --broker-list kafka:9092 \
+    --property schema.registry.url=http://schema-registry:8081 \
+    --topic t2 \
+    --property value.schema="{\"type\":\"record\",\"name\":\"myrecord\",\"fields\":[{\"name\":\"f1\",\"type\":\"string\"},{\"name\":\"f2\",\"type\":\"string\"}]}"
+{"f1": "value1", "f2": "other1"}
+{"f1": "value2", "f2": "other2"}
+{"f1": "value3", "f2": "other3"}
+{"f1": "value4", "f2": "other4"}
+{"f1": "value5", "f2": "other5"}
+EOF'
+```
+
+. Now show the values:
++
+```bash
+$ docker-compose exec connect kafka-avro-console-consumer \
+    --bootstrap-server kafka:9092 \
+    --topic t2 \
+    --property schema.registry.url=http://schema-registry:8081 \
+    --from-beginning \
+    --max-messages 5
+```
++
+It should return this:
++
+```bash
+{"f1":"value1","f2":"other1"}
+{"f1":"value2","f2":"other2"}
+{"f1":"value3","f2":"other3"}
+{"f1":"value4","f2":"other4"}
+{"f1":"value5","f2":"other5"}
+Processed a total of 5 messages
+```
