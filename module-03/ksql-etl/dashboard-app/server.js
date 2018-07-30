@@ -9,8 +9,8 @@ app.set('views', __dirname + '/public');
 app.use(express.static('public'));
 
 const pool = mariadb.createPool({
-    host: 'localhost', 
-    // host: 'dashboard-db', 
+    // host: 'localhost', 
+    host: 'dashboard-db', 
     user:'dashboard', 
     password: 'dashboard123',
     database: 'MyDashboard'
@@ -34,7 +34,7 @@ async function getTemperatureAggregates(){
     let conn;
     try {
       conn = await pool.getConnection();
-      const rows = await conn.query("SELECT * FROM `temperatures`");
+      const rows = await conn.query("SELECT * FROM `EXTREME_TEMPERATURES`");
       return rows;
     } catch (err) {
         throw err;

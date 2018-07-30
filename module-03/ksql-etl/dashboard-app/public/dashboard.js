@@ -18,26 +18,26 @@ async function poll(){
         list.innerHTML = '';
         for (var i = 0; i < arrayLength; i++) {
             var node = stationElem.cloneNode(true);
-            var stationId = stations[i].station_id;
+            var stationId = stations[i].STATION_ID;
             node.id = 'station-' + stationId;
             node.className = 'station';
             replaceValue(node, '.id', stationId);
-            replaceValue(node, '.name', stations[i].name);
+            replaceValue(node, '.name', stations[i].NAME);
             list.appendChild(node);
         }
     }
     let station;
     for (var i = 0; i < arrayLength; i++) {
-        var stationId = stations[i].station_id;
+        var stationId = stations[i].STATION_ID;
         stationElem = document.getElementById('station-' + stationId);
         updateStation(stationElem, stations[i]);
     }
 }
 
 function updateStation(element, station){
-    replaceValue(element, '.max_temp', station.max_temp);
-    replaceValue(element, '.min_temp', station.min_temp);
-    replaceValue(element, '.count', station.count);
+    replaceValue(element, '.max_temp', station.MAX_TEMP);
+    replaceValue(element, '.min_temp', station.MIN_TEMP);
+    replaceValue(element, '.count', station.COUNT);
 }
 
 function replaceValue(element, key, value){

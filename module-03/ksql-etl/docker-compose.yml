@@ -1,39 +1,5 @@
 version: "3.5"
 services:
-  weather-db:
-    build: 
-      context: weather-db
-    image: weather-db
-    ports:
-      - 5432:5432   # open for administration
-    networks:
-      - ksql-net
-
-  weather-app:
-    build: 
-      context: weather-app
-    image: weather-app
-    networks:
-      - ksql-net
-
-  dashboard-db:
-    build:
-      context: dashboard-db
-    image: dashboard-db
-    ports:
-      - 3306:3306   # open for administration
-    networks:
-      - ksql-net
-
-  dashboard-app:
-    build:
-      context: dashboard-app
-    image: dashboard-app
-    ports:
-      - 3000:3000
-    networks: 
-      - ksql-net
-      
   zookeeper:
     image: "confluentinc/cp-zookeeper:5.0.0"
     networks:
