@@ -1,5 +1,10 @@
 = Kafka ETL Pipeline
 
+== Prerequisites
+
+. Please note that *Kafka Connect* does not include a JDBC driver for *MariaDB* by default...
+.. Download the JDBC driver for MariaDB from here: https://mariadb.com/downloads/connector
+
 == Running the Pipeline
 
 . Navigate to the demo app folder:
@@ -21,8 +26,21 @@ This includes:
 * Confluent Control Center
 * Weather App
 * Weather DB
+* Dashboard DB
 
-. To interactively work with the DB (use password: `weatherapp123`):
+[NOTE]
+====
+Please note a few things about the `docker-compose.yml`
+
+* *connect:* the volume map to include the JDBC driver for MariaDB
+* *weather-db, dashboard-db:* We open the ports to be able to use DB admin tools on our laptop/VM
+====
+
+=== Admin the WeatherApp DB
+
+. Use a GUI admin tool such as https://www.postgresql.org/ftp/pgadmin/
+
+. Or, to interactively work with the DB (use password: `weatherapp123`):
 +
 ```bash
 $ docker run --rm -it \
@@ -37,6 +55,16 @@ e.g. add a station:
 weather=# INSERT INTO stations(name, lattitude, longitude, elevation)
             VALUES('Antartica 4', 270, 85, 2130);
 ```
+
+=== Admin the Dashboard DB
+The Dashboard DB is a MariaDB instance and can be easily administrated by e.b. using *Sequel Pro* (https://sequelpro.com/download)
+
+. Create a new connection:
+.. Name: `dashboard`
+.. Host: `127.0.0.1`
+.. Username: `dashboard`
+.. Password: `dashboard123`
+.. Database: `weather-dashboard`
 
 == Add a JDBC Source connector using C3
 
@@ -57,7 +85,7 @@ weather=# INSERT INTO stations(name, lattitude, longitude, elevation)
 == Configure Connect from the Command Line
 Alternatively we can also configure the connectors using the command line.
 
-=== List all Connectors
+=== List all available Connectors
 
 In a different terminal window navigate to the project folder and execute the following command:
 
@@ -66,7 +94,7 @@ $ docker-compose exec connect \
     curl connect:8083/connector-plugins | jq
 ```
 
-=== Add a JDBC Source Connector
+=== Add a JDBC Source Connector for PostreSQL
 
 . Define JDBC Source Connector to our `weather-db` Postgres database: 
 +
@@ -75,8 +103,20 @@ $ docker-compose exec connect \
 $ docker-compose exec connect \
     curl -s -X POST \
         -H "Content-Type: application/json" \
-        --data '{ "name": "weatherapp-source", "config": { "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector", "tasks.max": 1, "connection.url": "jdbc:postgresql://weather-db:5432/weather?user=weatherapp&password=weatherapp123", "table.whitelist": "stations,readings", "mode": "incrementing", "incrementing.column.name": "id", "topic.prefix": "postgres-" }}' \
-        http://connect:8083/connectors
+        --data '{ 
+    "name": "weatherapp-source", 
+    "config": { 
+        "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector", 
+        "tasks.max": 1, 
+        "connection.url": "jdbc:postgresql://weather-db:5432/weather", 
+        "connection.user": "weatherapp",
+        "connection.password": "weatherapp123",
+        "table.whitelist": "stations,readings", 
+        "mode": "incrementing", 
+        "incrementing.column.name": "id", 
+        "topic.prefix": "postgres-" 
+    }
+}' http://connect:8083/connectors
 ----
 +
 NOTE: The above configures a **whitelist** containing the tables `stations` and `readings` to be imported into Kafka.
@@ -122,6 +162,49 @@ $ docker-compose exec connect kafka-avro-console-consumer \
         --max-messages 3
 ----
 
+=== Add a JDBC Sink for MariaDB
+
+We want to use an instance of *MariaDB* as a sink.
+
+. Make sure you have followed the *Prerequisites* carefully otherwise the JDBC driver for *MariaDB* is not available!
+. Add the sink:
++
+[source,bash]
+----
+$ docker-compose exec connect \
+    curl -s -X POST \
+        -H "Content-Type: application/json" \
+        --data '{
+    "name": "stations-sink",
+    "config": {
+        "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+        "connection.url": "jdbc:mysql://dashboard-db:3306/MyDashboard",
+        "connection.user": "dashboard",
+        "connection.password": "dashboard123",
+        "topics": "postgres-stations",
+        "insert.mode": "insert",
+        "fields.whitelist": "id,name",
+        "tasks.max": "1",
+        "table.name.format": "${topic}",
+        "pk.mode": "record_value",
+        "pk.fields": "id",
+        "auto.create": true,
+        "auto.evolve": true,
+        "value.converter": "io.confluent.connect.avro.AvroConverter",
+        "value.converter.schema.registry.url": "http://schema-registry:8081"
+    }
+}' http://connect:8083/connectors
+----
+
+
+. Test status of connector :
++
+[source,bash]
+----
+$ docker-compose exec connect \
+    curl -s -X GET http://connect:8083/connectors/stations-sink/status | jq
+----
+
 == Running KSQL CLI
 
 . Run the KSQL CLI:
@@ -136,11 +219,19 @@ $ docker-compose exec ksql-cli ksql http://ksql-server:8088
 ksql> SET 'auto.offset.reset' = 'earliest';
 ```
 
-. Create a table from `stations` and a stream from `readings`:
+. Since the topic `postgres-stations` does not contain a key but KSQL tables need one we need to do extra steps:
++
+```sql
+ksql> CREATE STREAM stationsfeed WITH (KAFKA_TOPIC='postgres-stations', VALUE_FORMAT='AVRO');
+ksql> CREATE STREAM stationsfeedwithkey WITH (KAFKA_TOPIC='STATIONSFEEDWITHKEY', VALUE_FORMAT='AVRO') \
+        AS SELECT CAST(ID AS STRING) as KEY, * FROM stationsfeed PARTITION BY KEY;
+```
+
+. Finally we can create a table from `STATIONSFEEDWITHKEY` and a stream from topic `readings`:
 +
 ```sql
 ksql> CREATE TABLE stations \
-        WITH (kafka_topic='postgres-stations', value_format='AVRO', key='id');
+        WITH (kafka_topic='STATIONSFEEDWITHKEY', value_format='AVRO', key='id');
 ```
 +
 ```sql
@@ -176,22 +267,94 @@ Query terminated
 . Create some aggregates:
 +
 ```sql
-select station_id, \
-    max(temperature) as max, \
-    min(temperature) min, \
-    count(*) count \
-from readings \
-group by station_id;
+SELECT station_id, \
+    MAX(temperature) as max_temp, \
+    MIN(temperature) min_temp, \
+    COUNT(*) count \
+FROM readings \
+GROUP by station_id;
 ```
 +
-resulting in something like this:
+resulting in something like this (shortened):
 +
 ```bash
+...
 1 | -0.5405425429344177 | -1.5382883548736572 | 507
+...
 1 | -0.5387284159660339 | -1.5382883548736572 | 1000
-2 | -3.429884672164917 | -4.429297924041748 | 1000
+...
+2 | -7.650282859802246 | -8.648320198059082 | 998
+2 | -7.650282859802246 | -8.648320198059082 | 999
+2 | -7.650282859802246 | -8.648320198059082 | 1000
+...
+3 | 4.619408130645752 | 3.621914863586426 | 998
+3 | 4.619408130645752 | 3.621914863586426 | 999
 3 | 4.804220676422119 | 3.8066322803497314 | 1000
 ```
+
+. Now let's create a new stream from the above query that we will later export via *Connect*:
++
+```sql
+ksql> CREATE TABLE extreme_temperatures WITH (KAFKA_TOPIC='EXTREME_TEMPERATURES', VALUE_FORMAT='AVRO') \
+AS \
+SELECT station_id, \
+    MAX(temperature) as max_temp, \
+    MIN(temperature) min_temp, \
+    COUNT(*) count \
+FROM readings \
+GROUP by station_id;
+```
+
+. Test if there is some data:
++
+```sql
+ksql> SELECT * FROM extreme_temperatures;
+```
++
+It should give the same output as above...
+
+=== Add a JDBC Sink for MariaDB
+
+We want to use an instance of *MariaDB* as a sink.
+
+. Make sure you have followed the *Prerequisites* carefully otherwise the JDBC driver for *MariaDB* is not available!
+. Add the sink:
++
+[source,bash]
+----
+$ docker-compose exec connect \
+    curl -s -X POST \
+        -H "Content-Type: application/json" \
+        --data '{
+    "name": "extreme-temperatures-sink",
+    "config": {
+        "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+        "connection.url": "jdbc:mysql://dashboard-db:3306/MyDashboard",
+        "connection.user": "dashboard",
+        "connection.password": "dashboard123",
+        "topics": "EXTREME_TEMPERATURES",
+        "insert.mode": "upsert",
+        "tasks.max": "1",
+        "table.name.format": "${topic}",
+        "fields.whitelist": "station_id,max_temp,min_temp,count",
+        "pk.mode": "record_value",
+        "pk.fields": "station_id",
+        "auto.create": true,
+        "auto.evolve": true,
+        "value.converter": "io.confluent.connect.avro.AvroConverter",
+        "value.converter.schema.registry.url": "http://schema-registry:8081"
+    }
+}' http://connect:8083/connectors
+----
+
+
+. Test status of connector :
++
+[source,bash]
+----
+$ docker-compose exec connect \
+    curl -s -X GET http://connect:8083/connectors/extreme-temperatures-sink/status | jq
+----
 
 == Create a topic in Kafka with Format DELIMITED
 
