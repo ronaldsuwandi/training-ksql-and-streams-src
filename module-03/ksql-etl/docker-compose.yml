@@ -25,6 +25,15 @@ services:
     networks:
       - ksql-net
 
+  dashboard-app:
+    build:
+      context: dashboard-app
+    image: dashboard-app
+    ports:
+      - 3000:3000
+    networks: 
+      - ksql-net
+      
   zookeeper:
     image: "confluentinc/cp-zookeeper:5.0.0"
     networks:
