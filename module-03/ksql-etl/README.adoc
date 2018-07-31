@@ -220,7 +220,7 @@ $ docker-compose exec connect kafka-avro-console-consumer \
 
 === Add a JDBC Sink for MariaDB
 
-We want to use an instance of *MariaDB* as a sink.
+We want to use an instance of *MariaDB* as a sink. We stream the `postgres-stations` topic directly to this sink.
 
 . Make sure you have followed the *Prerequisites* carefully otherwise the JDBC driver for *MariaDB* is not available!
 . Add the sink:
@@ -251,7 +251,6 @@ $ docker-compose exec connect \
     }
 }' http://connect:8083/connectors
 ----
-
 
 . Test status of connector :
 +
@@ -418,7 +417,14 @@ $ docker-compose exec connect \
     curl -s -X GET http://connect:8083/connectors/extreme-temperatures-sink/status | jq
 ----
 
-== Create a topic in Kafka with Format DELIMITED
+=== Run the Dashboard
+
+. Open a new browser window at http://localhost:3000 an observe how the minimum and maximum temperatures per station are displayed and how they change over time as new temperature readings flow into the system.
+
+== Appendix
+Here we show some techniques in and around topics using DELIMITED and AVRO message format.
+
+=== Creating a topic in Kafka with Format DELIMITED
 
 . Create the topic:
 +
@@ -462,9 +468,7 @@ ksql> CREATE STREAM test(message string) \
         WITH (kafka_topic='test-topic', value_format='DELIMITED');
 ```
 
-== Kafka Avro
-
-=== Avro Schema with one field.
+=== Creating an Avro Schema with one field.
 
 . Create some data:
 +
@@ -504,7 +508,7 @@ which should give this:
 Processed a total of 5 messages
 ```
 
-=== Avro Schema with two fields.
+=== Creating an Avro Schema with two fields.
 
 . Create some data:
 +
