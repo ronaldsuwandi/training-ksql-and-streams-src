@@ -5,7 +5,7 @@ for FILE in $FILES
 do
     DIR=$(dirname $FILE)
     cd $DIR
-    echo "*** Compiling project in $DIR"
+    echo "\n\n\n*** Compiling project in $DIR"
     docker container run --rm \
         -v "$PWD":/home/gradle/project \
         -v "$HOME"/.gradle:/root/.gradle \
