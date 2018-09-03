@@ -51,9 +51,6 @@ public class CustomMaxAggregatorSupplier implements ProcessorSupplier<String, Lo
         }
     
         @Override
-        public void punctuate(long timestamp) {} // deprecated; not used
-    
-        @Override
         public void close() {}
     }    
 

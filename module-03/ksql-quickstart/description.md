@@ -48,7 +48,7 @@ Let's run the Confluent platform consisting of Zookeeper, Kafka, KSQL server and
         -e STREAMS_SCHEMA_REGISTRY_HOST=schema-registry \
         -e STREAMS_SCHEMA_REGISTRY_PORT=8081 \
         --network ksql-quickstart_demo-net \
-        confluentinc/ksql-cli:4.1.0 /bin/bash
+        confluentinc/ksql-cli:5.0.0 /bin/bash
     ```
 
     We're running the KSQL CLI from withing a container that we have attached to the network `ksql-quickstart_demo-net` on which the Confluent platform runs.
@@ -135,7 +135,7 @@ For more details please see the [quick start](https://docs.confluent.io/current/
     ```bash
     $ docker container run -it --rm \
         --network ksql-quickstart_demo-net \
-        confluentinc/cp-enterprise-kafka:4.1.0 kafka-console-consumer \
+        confluentinc/cp-enterprise-kafka:5.0.0 kafka-console-consumer \
             --topic pageviews \
             --bootstrap-server kafka:29092 \
             --from-beginning \
@@ -148,7 +148,7 @@ For more details please see the [quick start](https://docs.confluent.io/current/
     ```bash
     $ docker container run -it --rm \
         --network ksql-quickstart_demo-net \
-        confluentinc/cp-enterprise-kafka:4.1.0 kafka-console-consumer \
+        confluentinc/cp-enterprise-kafka:5.0.0 kafka-console-consumer \
             --topic users \
             --bootstrap-server kafka:29092 \
             --from-beginning \
@@ -160,7 +160,7 @@ For more details please see the [quick start](https://docs.confluent.io/current/
     ```bash
     $ docker container run -it --rm \
         --network ksql-quickstart_demo-net \
-        confluentinc/cp-enterprise-kafka:4.1.0 kafka-console-producer \
+        confluentinc/cp-enterprise-kafka:5.0.0 kafka-console-producer \
             --topic t1 \
             --broker-list kafka:29092 \
             --property parse.key=true \
@@ -182,7 +182,7 @@ For more details please see the [quick start](https://docs.confluent.io/current/
     ```bash
     $ docker container run -it --rm \
         --network ksql-quickstart_demo-net \
-        confluentinc/cp-enterprise-kafka:4.1.0 kafka-console-producer \
+        confluentinc/cp-enterprise-kafka:5.0.0 kafka-console-producer \
             --topic t2 \
             --broker-list kafka:29092  \
             --property parse.key=true \
@@ -206,7 +206,7 @@ For more details please see the [quick start](https://docs.confluent.io/current/
     ```bash
     $ docker container run -it --rm \
         --network ksql-quickstart_demo-net \
-        confluentinc/cp-enterprise-kafka:4.1.0 kafka-topics \
+        confluentinc/cp-enterprise-kafka:5.0.0 kafka-topics \
             --zookeeper zookeeper:32181 \
             --list
     ```
