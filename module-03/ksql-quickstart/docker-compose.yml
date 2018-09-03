@@ -21,7 +21,8 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka:9092"
-
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      
   schema-registry:
     image: "confluentinc/cp-schema-registry:5.0.0"
     networks:
