@@ -1,5 +1,4 @@
-FROM gradle:4.8.0-jdk8 AS builder
-RUN mkdir -p /home/gradle/project/.gradle 
+FROM frekele/gradle:latest AS builder
 WORKDIR /home/gradle/project
 COPY . .
 RUN gradle build

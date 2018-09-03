@@ -15,10 +15,14 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.kstream.Serialized;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.Windowed;
+import org.apache.kafka.streams.kstream.WindowedSerdes;
+import io.confluent.kafka.serializers.KafkaJsonSerializer;
+import io.confluent.kafka.serializers.KafkaJsonDeserializer;
 
 public class StreamsApp {
     public static class TemperatureReading{
@@ -58,9 +62,8 @@ public class StreamsApp {
 
     private static Topology getTopology() {
         final Serde<String> stringSerde = Serdes.String();
-        // final Serde<Integer> integerSerde = Serdes.Integer();
         final Serde<TemperatureReading> tempSerde = getJsonSerde();
-        final Serde<Windowed<String>> windowedStringSerde = new WindowedSerde<>(stringSerde);
+        final Serde<Windowed<String>> windowedStringSerde = WindowedSerdes.timeWindowedSerdeFrom(String.class);
         final StreamsBuilder builder = new StreamsBuilder();
         builder
             .stream(INPUT_TOPIC, Consumed.with(stringSerde, tempSerde))
@@ -68,7 +71,7 @@ public class StreamsApp {
                 try { TimeUnit.MILLISECONDS.sleep(300); } catch(Exception ex) {}      // artificially delay execution
                 return v;
             })
-            .groupByKey(stringSerde, tempSerde)
+            .groupByKey(Serialized.with(stringSerde, tempSerde))
             .windowedBy(TimeWindows.of(TimeUnit.MINUTES.toMillis(60)))
             .reduce((aggValue, newValue) -> newValue.temperature > aggValue.temperature ? newValue : aggValue)
             .toStream()
@@ -77,17 +80,16 @@ public class StreamsApp {
     }
 
     private static Serde<TemperatureReading> getJsonSerde(){
-        final Serializer<TemperatureReading> serializer = new JsonPOJOSerializer<>();
         Map<String, Object> serdeProps = new HashMap<>();
-        serdeProps.put("JsonPOJOClass", TemperatureReading.class);
+        serdeProps.put("json.value.type", TemperatureReading.class);
+
+        final Serializer<TemperatureReading> serializer = new KafkaJsonSerializer<>();
         serializer.configure(serdeProps, false);
 
-        final Deserializer<TemperatureReading> deserializer = new JsonPOJODeserializer<>();
-        serdeProps.put("JsonPOJOClass", TemperatureReading.class);
+        final Deserializer<TemperatureReading> deserializer = new KafkaJsonDeserializer<>();
         deserializer.configure(serdeProps, false);
 
-        Serde<TemperatureReading> serde = Serdes.serdeFrom(serializer, deserializer);
-        return serde;
+        return Serdes.serdeFrom(serializer, deserializer);
     }
 
     private static KafkaStreams startApp(StreamsConfig config, Topology topology){

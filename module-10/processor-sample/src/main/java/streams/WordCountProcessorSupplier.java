@@ -52,11 +52,6 @@ public class WordCountProcessorSupplier implements ProcessorSupplier<String, Str
             }
             context.commit();
         }
-
-        @Override
-        public void punctuate(long timestamp) {
-            // this method is deprecated and should not be used anymore
-        }
     
         @Override
         public void close() {}
