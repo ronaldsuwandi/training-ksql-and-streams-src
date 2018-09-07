@@ -21,7 +21,6 @@ public class MapSample {
         Properties settings = new Properties();
         settings.put(StreamsConfig.APPLICATION_ID_CONFIG, "map-sample-v0.1.0");
         settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
-        StreamsConfig config = new StreamsConfig(settings);
 
         final Serde<String> stringSerde = Serdes.String();
         StreamsBuilder builder = new StreamsBuilder();
@@ -30,7 +29,7 @@ public class MapSample {
         transformed.to("lines-lower-topic", Produced.with(stringSerde, stringSerde));
         Topology topology = builder.build();
         
-        KafkaStreams streams = new KafkaStreams(topology, config);
+        KafkaStreams streams = new KafkaStreams(topology, settings);
         streams.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
