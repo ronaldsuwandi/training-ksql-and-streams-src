@@ -25,6 +25,7 @@ services:
       CONFLUENT_METRICS_REPORTER_TOPIC_CREATE: "false"
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka:9092"
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
 
   schema-registry:
     image: "confluentinc/cp-schema-registry:5.0.0"
