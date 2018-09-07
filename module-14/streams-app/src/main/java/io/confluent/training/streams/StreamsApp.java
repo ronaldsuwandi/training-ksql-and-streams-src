@@ -38,14 +38,14 @@ public class StreamsApp {
     public static void main(String[] args) {
         System.out.printf("*** Starting %s Application ***%n", APPLICATION_NAME);
 
-        StreamsConfig config = getConfig();
+        Properties config = getConfig();
         Topology topology = getTopology();
         KafkaStreams streams =  startApp(config, topology);
 
         setupShutdownHook(streams);
     }
 
-    private static StreamsConfig getConfig(){
+    private static Properties getConfig(){
         Properties settings = new Properties();
         settings.put(StreamsConfig.APPLICATION_ID_CONFIG, APPLICATION_ID);
         settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
@@ -56,8 +56,7 @@ public class StreamsApp {
         settings.put(StreamsConfig.CONSUMER_PREFIX + ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG,
             "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor");
 
-        StreamsConfig config = new StreamsConfig(settings);
-        return config;        
+        return settings;        
     }
 
     private static Topology getTopology() {
@@ -92,7 +91,7 @@ public class StreamsApp {
         return Serdes.serdeFrom(serializer, deserializer);
     }
 
-    private static KafkaStreams startApp(StreamsConfig config, Topology topology){
+    private static KafkaStreams startApp(Properties config, Topology topology){
         KafkaStreams streams = new KafkaStreams(topology, config);
         streams.start();
         return streams;

@@ -31,7 +31,7 @@ public class JsonSample {
     public static void main(String[] args) {
         System.out.printf("*** Starting %s Application ***%n", APPLICATION_NAME);
 
-        StreamsConfig config = getConfig();
+        Properties config = getConfig();
         Topology topology = getTopology();
         KafkaStreams streams =  startApp(config, topology);
 
@@ -67,15 +67,14 @@ public class JsonSample {
         return Serdes.serdeFrom(temperatureSerializer, temperatureDeserializer);
     }
 
-    private static StreamsConfig getConfig(){
+    private static Properties getConfig(){
         Properties settings = new Properties();
         settings.put(StreamsConfig.APPLICATION_ID_CONFIG, APPLICATION_ID);
         settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
-        StreamsConfig config = new StreamsConfig(settings);
-        return config;        
+        return settings;        
     }
 
-    private static KafkaStreams startApp(StreamsConfig config, Topology topology){
+    private static KafkaStreams startApp(Properties config, Topology topology){
         KafkaStreams streams = new KafkaStreams(topology, config);
         streams.start();
         return streams;
