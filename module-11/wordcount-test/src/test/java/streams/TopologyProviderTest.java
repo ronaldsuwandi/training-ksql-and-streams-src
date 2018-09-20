@@ -1,4 +1,4 @@
-package io.confluent.training.streams;
+package streams;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;

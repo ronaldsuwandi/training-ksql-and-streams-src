@@ -1,4 +1,4 @@
-package io.confluent.training.streams;
+package streams;
 
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;

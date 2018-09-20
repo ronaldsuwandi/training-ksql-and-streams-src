@@ -1,4 +1,4 @@
-package io.confluent.training.streams;
+package streams;
 
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;

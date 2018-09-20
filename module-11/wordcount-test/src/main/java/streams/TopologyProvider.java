@@ -1,4 +1,4 @@
-package io.confluent.training.streams;
+package streams;
 
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
