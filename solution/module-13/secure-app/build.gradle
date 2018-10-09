@@ -12,14 +12,13 @@ repositories {
 }
 
 shadowJar {
-   baseName = 'secureapp-sample'
+   baseName = 'app'
    classifier = null
-   version = '0.1.0'
+   version = null
 }
 
 jar {
     baseName = 'secureapp-sample'
-    version =  '0.1.0'
 }
 
 sourceCompatibility = 1.8
