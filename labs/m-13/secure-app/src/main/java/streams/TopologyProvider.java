@@ -1,4 +1,4 @@
-package io.confluent.training.streams;
+package streams;
 
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.StreamsBuilder;

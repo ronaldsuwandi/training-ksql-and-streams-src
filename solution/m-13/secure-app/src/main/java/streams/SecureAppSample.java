@@ -1,4 +1,4 @@
-package io.confluent.training.streams;
+package streams;
 
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.Topology;
@@ -25,11 +25,9 @@ public class SecureAppSample {
 
         streams.start();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            @Override
-            public void run() {
-                streams.close();
-            }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("### Stopping the Security Sample Application ###");
+            streams.close();
         }));
     }
 }

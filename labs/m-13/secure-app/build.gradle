@@ -4,7 +4,7 @@ plugins {
   id 'application'
 }
 
-mainClassName = 'io.confluent.training.streams.SecureAppSample'
+mainClassName = 'streams.SecureAppSample'
 
 repositories {
     mavenCentral()
