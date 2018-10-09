@@ -4,7 +4,7 @@ plugins {
   id 'application'
 }
 
-mainClassName = 'io.confluent.training.streams.WordCountSample'
+mainClassName = 'streams.WordCountSample'
 
 repositories {
     mavenCentral()
@@ -12,14 +12,13 @@ repositories {
 }
 
 shadowJar {
-   baseName = 'wordcount-sample'
+   baseName = 'app'
    classifier = null
-   version = '0.1.0'
+   version = null
 }
 
 jar {
     baseName = 'wordcount-sample'
-    version =  '0.1.0'
 }
 
 sourceCompatibility = 1.8
