@@ -1,4 +1,4 @@
-package io.confluent.training.streams;
+package streams;
 
 import java.util.Properties;
 import java.util.Random;
@@ -45,7 +45,7 @@ public class TempProducer {
             Integer temperature = lastTemperature[stationIndex] + delta;
             lastTemperature[stationIndex] = temperature;
             // create a JSON string
-            String value = "{ 'station': '" + station + "', 'temperature': " + temperature.toString() + "}";
+            String value = "{ \"station\": \"" + station + "\", \"temperature\": " + temperature.toString() + "}";
             ProducerRecord<String, String> rec = new ProducerRecord<>(topic, station, value);
             epoch_time += 1000;         // add one second to simulate one reading per second...
 
