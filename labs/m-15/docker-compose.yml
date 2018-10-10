@@ -10,10 +10,11 @@ services:
 
   kafka:
     image: "confluentinc/cp-enterprise-kafka:5.0.0"
+    hostname: kafka
     networks:
       - streams-net
     environment:
-      KAFKA_BROKER_ID: 1
+      KAFKA_BROKER_ID: 101
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_DELETE_TOPIC_ENABLE: "true"
