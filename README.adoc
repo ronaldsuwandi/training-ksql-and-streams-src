@@ -9,17 +9,18 @@ Sample Solutions - Version 5.0.0-v1
 
 . Clone this repository into a folder `~/confluent-labs` on your computer:
 
-    $ git clone https://github.com/confluentinc/training-ksql-and-streams-src.git ~/confluent-labs
+    $ git clone https://github.com/confluentinc/training-ksql-and-streams-src.git ~/confluent-streams
 
 . Navigate to this folder:
 
-    $ cd ~/confluent-labs
+    $ cd ~/confluent-streams
 
 . *Optional:* Open this folder in your favorite code editor; e.g. if you have *VS Code* installed then:
 
     $ code .
 
-NOTE: For each module of the course that has exercises we have a corresponding sub-folder `module-xx` in this repository. In this subfolder we find a working sample solution for each exercise.
+NOTE: We have two main folders `solution` and `labs` in this repo. The former contains the complete sample solution for each exercise while the latter contains the scaffolding for each exercise and is meant to be used during the hands-on-labs. +
+For each module of the course that has exercises we have a corresponding sub-folder `m-xx` where the respective exercises can be found.
 
 == Java base Exercises using Gradle
 
@@ -29,19 +30,20 @@ To build a project Java project using *Gradle* do the following:
 
 2. Run this command to build the `jar`:
 +
+[source,subs="verbatim,quotes"]
 ----
-$ docker run -it --rm \
-    -v "$PWD":/usr/src/app \
-    -v "$HOME"/.m2:/root/.m2 \
-    -w /usr/src/app \
-    maven:3.5.3-jdk-8-alpine mvn clean install
+$ *docker container run --rm \
+    -v ${PWD}:/home/gradle/project \
+    -v ${HOME}/.gradle:/root/.gradle \
+    -w /home/gradle/project \
+    frekele/gradle:latest gradle build*
 ----
 
 3. Run the application:
 +
 ----
 $ docker container run --rm \
-    -v $(PWD)/target/<jar-name>-<version>.jar:/app.jar \
+    -v $(PWD)/target/app.jar:/app.jar \
     openjdk:8-jre-alpine java -jar /app.jar
 ----
 +
@@ -49,6 +51,6 @@ NOTE: Sometimes the Alpine based image is not working depending on the dependenc
 +
 ----
 $ docker container run --rm \
-    -v $(PWD)/target/<jar-name>-<version>.jar:/app.jar \
+    -v $(PWD)/target/app.jar:/app.jar \
     openjdk:8-jre java -jar /app.jar
 ----
