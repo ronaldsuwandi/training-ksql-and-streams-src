@@ -47,5 +47,15 @@ services:
       CONTROL_CENTER_STREAMS_NUM_STREAM_THREADS: 1
       CONTROL_CENTER_STREAMS_CONSUMER_REQUEST_TIMEOUT_MS: "960032"
 
+  base:
+    image: confluentinc/cp-kafka-connect:5.0.0
+    hostname: base
+    networks:
+      - streams-net
+    command: /bin/sh
+    tty: true
+    environment:
+      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.0.0.jar
+
 networks:
   streams-net:
