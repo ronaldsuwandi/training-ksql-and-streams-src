@@ -15,7 +15,10 @@ services:
       - streams-net
     ports:
       - 9092:9092
+    volumes:
+      - $PWD/../interceptors:/interceptors
     environment:
+      CLASSPATH: /interceptors/monitoring-interceptors-5.0.0.jar
       KAFKA_BROKER_ID: 101
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
