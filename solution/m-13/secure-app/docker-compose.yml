@@ -111,11 +111,12 @@ services:
 
   base:
     image: confluentinc/cp-kafka-connect:5.0.0
+    container_name: base
     hostname: base
     networks:
       - streams-net
     volumes:
-      - ./data:/data
+      - $PWD/scripts/security:/etc/kafka/secrets
     command: /bin/sh
     tty: true
     environment:
