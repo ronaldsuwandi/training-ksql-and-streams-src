@@ -109,5 +109,17 @@ services:
       CONTROL_CENTER_STREAMS_SSL_KEY_PASSWORD: confluent
       CONTROL_CENTER_STREAMS_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
 
+  base:
+    image: confluentinc/cp-kafka-connect:5.0.0
+    hostname: base
+    networks:
+      - streams-net
+    volumes:
+      - ./data:/data
+    command: /bin/sh
+    tty: true
+    environment:
+      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.0.0.jar
+
 networks:
   streams-net:
