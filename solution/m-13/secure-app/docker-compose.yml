@@ -26,15 +26,12 @@ services:
       - zookeeper
     volumes:
       - $PWD/scripts/security:/etc/kafka/secrets
-      - $PWD/../../interceptors:/interceptors
     networks:
       - streams-net
     ports:
       - "9091:9091"
       - "29091:29091"
     environment:
-      # To allow the monitoring of console consumer and producer in Confluent Control Center
-      CLASSPATH: /interceptors/monitoring-interceptors-5.0.0.jar
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: SASL_SSL:SASL_SSL,SSL:SSL,SASL_SSL_HOST:SASL_SSL,PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: SASL_SSL
@@ -111,6 +108,18 @@ services:
       CONTROL_CENTER_STREAMS_SSL_KEYSTORE_PASSWORD: confluent
       CONTROL_CENTER_STREAMS_SSL_KEY_PASSWORD: confluent
       CONTROL_CENTER_STREAMS_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
+
+  base:
+    image: confluentinc/cp-kafka-connect:5.0.0
+    hostname: base
+    networks:
+      - streams-net
+    volumes:
+      - ./data:/data
+    command: /bin/sh
+    tty: true
+    environment:
+      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.0.0.jar
 
 networks:
   streams-net:
