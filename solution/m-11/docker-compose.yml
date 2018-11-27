@@ -10,7 +10,6 @@ services:
 
   kafka:
     image: "confluentinc/cp-enterprise-kafka:5.0.0"
-    hostname: kafka
     networks:
       - streams-net
     ports:
