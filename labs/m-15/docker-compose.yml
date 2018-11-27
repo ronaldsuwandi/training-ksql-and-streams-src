@@ -11,6 +11,8 @@ services:
   kafka:
     image: "confluentinc/cp-enterprise-kafka:5.0.0"
     hostname: kafka
+    depends_on:
+      - zookeeper
     networks:
       - streams-net
     environment:
@@ -37,6 +39,8 @@ services:
 
   ksql-server:
     image: "confluentinc/cp-ksql-server:5.0.0"
+    ports:
+      - "8088:8088"
     networks:
       - streams-net
     environment:
@@ -44,7 +48,7 @@ services:
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties"
       KSQL_BOOTSTRAP_SERVERS: "kafka:9092"
       KSQL_HOST_NAME: ksql-server
-      KSQL_APPLICATION_ID: "streams-demo"
+      KSQL_APPLICATION_ID: "etl-demo"
       KSQL_LISTENERS: "http://0.0.0.0:8088"
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
@@ -62,6 +66,9 @@ services:
   control-center:
     image: confluentinc/cp-enterprise-control-center:5.0.0
     restart: always
+    depends_on:
+      - zookeeper
+      - kafka
     networks:
       - streams-net
     ports:
