@@ -2,6 +2,7 @@ version: '3.5'
 services:
   zookeeper:
     image: "confluentinc/cp-zookeeper:5.0.0"
+    hostname: zookeeper
     networks:
       - streams-net
     environment:
@@ -28,6 +29,7 @@ services:
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:5.0.0
+    hostname: control-center
     restart: always
     depends_on:
       - zookeeper

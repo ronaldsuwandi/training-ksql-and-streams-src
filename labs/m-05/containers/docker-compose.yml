@@ -1,6 +1,7 @@
 version: '3.5'
 services:
   zookeeper:
+    hostname: zookeeper
     image: "confluentinc/cp-zookeeper:5.0.0"
     networks:
       - streams-net
@@ -27,6 +28,7 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
 
   schema-registry:
+    hostname: schema-registry
     image: "confluentinc/cp-schema-registry:5.0.0"
     networks:
       - streams-net
@@ -36,6 +38,7 @@ services:
       SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
 
   ksql-server:
+    hostname: ksql-server
     image: "confluentinc/cp-ksql-server:5.0.0"
     networks:
       - streams-net
@@ -52,14 +55,8 @@ services:
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       KSQL_KSQL_SERVER_UI_ENABLED: "false"
 
-  ksql-cli:
-    image: confluentinc/cp-ksql-cli:5.0.0
-    networks:
-      - streams-net
-    entrypoint: /bin/sh
-    tty: true
-
   control-center:
+    hostname: control-center
     image: confluentinc/cp-enterprise-control-center:5.0.0
     restart: always
     networks:

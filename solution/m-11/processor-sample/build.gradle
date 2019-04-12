@@ -28,4 +28,5 @@ dependencies {
     compile group: "org.slf4j", name: "slf4j-log4j12", version: "1.7.25"
     compile group: "org.apache.kafka", name: "kafka-clients", version: "2.0.0"
     compile group: "org.apache.kafka", name: "kafka-streams", version: "2.0.0"
+    compile group: "io.confluent", name: "monitoring-interceptors", version: "5.0.0"
 }
