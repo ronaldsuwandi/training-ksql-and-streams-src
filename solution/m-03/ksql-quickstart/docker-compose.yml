@@ -1,6 +1,7 @@
 version: '3.5'
 services:
   zookeeper:
+    hostname: zookeeper
     image: "confluentinc/cp-zookeeper:5.0.0"
     networks:
       - ksql-net
@@ -9,6 +10,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
+    hostname: kafka
     image: "confluentinc/cp-enterprise-kafka:5.0.0"
     networks:
       - ksql-net
@@ -24,6 +26,7 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       
   schema-registry:
+    hostname: schema-registry
     image: "confluentinc/cp-schema-registry:5.0.0"
     networks:
       - ksql-net
@@ -34,6 +37,7 @@ services:
 
   # Runs the Kafka KSQL data generator for topic called "pageviews"
   ksql-datagen-pageviews:
+    hostname: ksql-datagen-pageviews
     image: "confluentinc/ksql-examples:5.0.0"
     networks:
       - ksql-net
@@ -56,6 +60,7 @@ services:
 
   # Runs the Kafka KSQL data generator for topic called "users"
   ksql-datagen-users:
+    hostname: ksql-datagen-users
     image: "confluentinc/ksql-examples:5.0.0"
     networks:
       - ksql-net
@@ -77,6 +82,7 @@ services:
       STREAMS_SCHEMA_REGISTRY_PORT: 8081
 
   ksql-server:
+    hostname: ksql-server
     image: "confluentinc/cp-ksql-server:5.0.0"
     ports:
       - "8088:8088"
@@ -94,13 +100,6 @@ services:
       KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       KSQL_KSQL_SERVER_UI_ENABLED: "false"
-
-  ksql-cli:
-    image: confluentinc/cp-ksql-cli:5.0.0
-    networks:
-      - ksql-net
-    entrypoint: /bin/sh
-    tty: true
 
 networks:
   ksql-net:
