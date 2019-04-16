@@ -35,5 +35,18 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
       SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
 
+  base:
+    image: cnfltraining/training-tools:5.1.2-ksql
+    hostname: base
+    networks:
+      - streams-net
+    volumes:
+      - .:/root/confluent-streams/labs/m-10
+    command: /bin/sh
+    tty: true
+    environment:
+      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.0.0.jar
+
+
 networks:
   streams-net:

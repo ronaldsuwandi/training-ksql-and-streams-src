@@ -56,5 +56,17 @@ services:
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       KSQL_KSQL_SERVER_UI_ENABLED: "false"
 
+  base:
+    image: cnfltraining/training-tools:5.1.2-ksql
+    hostname: base
+    networks:
+      - kafka-net
+    volumes:
+      - .:/root/confluent-streams/labs/m-06/
+    command: /bin/sh
+    tty: true
+    environment:
+      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.0.0.jar
+
 networks:
   kafka-net:
