@@ -1,6 +1,7 @@
 version: '3.5'
 services:
   zookeeper:
+    hostname: zookeeper
     image: "confluentinc/cp-zookeeper:5.0.0"
     networks:
       - streams-net
@@ -9,6 +10,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
+    hostname: kafka
     image: "confluentinc/cp-enterprise-kafka:5.0.0"
     hostname: kafka
     networks:
@@ -27,6 +29,7 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
 
   schema-registry:
+    hostname: schema-registry
     image: "confluentinc/cp-schema-registry:5.0.0"
     networks:
       - streams-net
@@ -36,6 +39,7 @@ services:
       SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
 
   ksql-server:
+    hostname: ksql-server
     image: "confluentinc/cp-ksql-server:5.0.0"
     networks:
       - streams-net
@@ -54,14 +58,8 @@ services:
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       KSQL_KSQL_SERVER_UI_ENABLED: "false"
 
-  ksql-cli:
-    image: confluentinc/cp-ksql-cli:5.0.0
-    networks:
-      - streams-net
-    entrypoint: /bin/sh
-    tty: true
-
   control-center:
+    hostname: control-center
     image: confluentinc/cp-enterprise-control-center:5.0.0
     networks:
       - streams-net
@@ -80,6 +78,17 @@ services:
       CONTROL_CENTER_KSQL_URL: "http://ksql-server:8088"
       CONTROL_CENTER_KSQL_ADVERTISED_URL: "http://localhost:8088"
       CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+
+  base:
+    image: cnfltraining/training-tools:5.1.2-ksql
+    hostname: base
+    networks:
+      - streams-net
+    volumes:
+      - .:/root/confluent-streams/labs/m-04
+    command: /bin/sh
+    tty: true
+
 
 networks:
   streams-net:

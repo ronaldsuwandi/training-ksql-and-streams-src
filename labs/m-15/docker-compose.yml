@@ -2,6 +2,7 @@ version: '3.5'
 services:
   zookeeper:
     image: "confluentinc/cp-zookeeper:5.0.0"
+    hostname: zookeeper
     networks:
       - streams-net
     environment:
@@ -28,6 +29,7 @@ services:
 
   schema-registry:
     image: "confluentinc/cp-schema-registry:5.0.0"
+    hostname: schema-registry
     networks:
       - streams-net
     environment:
@@ -37,6 +39,7 @@ services:
 
   ksql-server:
     image: "confluentinc/cp-ksql-server:5.0.0"
+    hostname: ksql-server
     ports:
       - "8088:8088"
     networks:
@@ -54,15 +57,9 @@ services:
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       KSQL_KSQL_SERVER_UI_ENABLED: "false"
 
-  ksql-cli:
-    image: confluentinc/cp-ksql-cli:5.0.0
-    networks:
-      - streams-net
-    entrypoint: /bin/sh
-    tty: true
-
   control-center:
     image: confluentinc/cp-enterprise-control-center:5.0.0
+    hostname: control-center
     restart: always
     networks:
       - streams-net
@@ -81,6 +78,17 @@ services:
       CONTROL_CENTER_KSQL_URL: "http://ksql-server:8088"
       CONTROL_CENTER_KSQL_ADVERTISED_URL: "http://localhost:8088"
       CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+
+  base:
+    image: cnfltraining/training-tools:5.1.2-ksql
+    hostname: base
+    networks:
+      - streams-net
+    volumes:
+      - .:/root/confluent-streams/labs/m-15
+    command: /bin/sh
+    tty: true
+
 
 networks:
   streams-net:

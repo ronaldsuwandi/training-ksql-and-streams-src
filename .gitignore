@@ -2,5 +2,7 @@ experiments/
 target/
 .gradle
 build/
-.vscode/
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
 .DS_Store

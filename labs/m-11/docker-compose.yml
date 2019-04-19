@@ -1,6 +1,7 @@
 version: '3.5'
 services:
   zookeeper:
+    hostname: zookeeper
     image: "confluentinc/cp-zookeeper:5.0.0"
     networks:
       - streams-net
@@ -25,6 +26,7 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
 
   schema-registry:
+    hostname: schema-registry
     image: "confluentinc/cp-schema-registry:5.0.0"
     networks:
       - streams-net
@@ -32,6 +34,17 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
       SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
+
+  base:
+    image: cnfltraining/training-tools:5.1.2-ksql
+    hostname: base
+    networks:
+      - streams-net
+    volumes:
+      - .:/root/confluent-streams/labs/m-11
+    command: /bin/sh
+    tty: true
+
 
 networks:
   streams-net:
