@@ -120,8 +120,7 @@ services:
       - .:/root/confluent-streams/labs/m-14/secure-app
     command: /bin/sh
     tty: true
-    environment:
-      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.0.0.jar
+
 
 
 networks:

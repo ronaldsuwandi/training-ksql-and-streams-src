@@ -88,8 +88,7 @@ services:
       - .:/root/confluent-streams/labs/m-15
     command: /bin/sh
     tty: true
-    environment:
-      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.0.0.jar
+
 
 networks:
   streams-net:
