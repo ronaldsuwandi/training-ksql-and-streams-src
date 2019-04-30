@@ -1,6 +1,7 @@
+"Using the KSQL REST API"
+import time
 from confluent_kafka import Producer, Consumer, KafkaError
 import requests
-import time
 
 quotes = [
     "Kafka enables the Confluent Streaming Platform",
@@ -15,10 +16,10 @@ bootstrap_servers = "kafka:9092"
 
 
 def produce_quotes():
+    "Write the quotes onto the output_topic"
     print("------ Writing quotes to topic '" + output_topic + "' ------")
     producer = Producer({"bootstrap.servers": bootstrap_servers})
-    for x in range(0, len(quotes)):
-        quote = quotes[x]
+    for quote in quotes:
         print("*** writing: " + quote)
         producer.produce(output_topic, value=quote)
     producer.flush()
@@ -26,6 +27,7 @@ def produce_quotes():
 
 
 def post_expression(ksql):
+    "POST to the KSQL REST API"
     headers = {
         "accept": "application/vnd.ksql.v1+json",
         "content-type": "application/vnd.ksql.v1+json"
@@ -35,7 +37,7 @@ def post_expression(ksql):
         "streamsProperties": {"ksql.streams.auto.offset.reset": "earliest"}
     }
     try:
-        r = requests.post("http://ksql-server:8088/ksql", json = data, headers=headers)
+        r = requests.post("http://ksql-server:8088/ksql", json=data, headers=headers)
     except:
         print("ERROR: " + str(r.status_code) + ", " + r.text)
         raise
@@ -43,8 +45,11 @@ def post_expression(ksql):
 
 
 def call_ksql():
+    "Configure stream quotes_orig"
     print("--------- Posting to KSQL Server ---------")
-    ksql = "CREATE STREAM quotes_orig (line STRING) WITH(KAFKA_TOPIC='quotes', VALUE_FORMAT='DELIMITED');"
+    ksql = ("CREATE STREAM quotes_orig (line STRING) "
+            "WITH(KAFKA_TOPIC='quotes', "
+            "VALUE_FORMAT='DELIMITED');")
     post_expression(ksql)
 
     # wait until KSQL server has created the stream
@@ -56,6 +61,7 @@ def call_ksql():
 
 
 def consume_lowercase_quotes():
+    "Consume from input_topic"
     print("------ Reading from topic '" + input_topic + "' ------")
     consumer = Consumer({
         "bootstrap.servers": bootstrap_servers,
