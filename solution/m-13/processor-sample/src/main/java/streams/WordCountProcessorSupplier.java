@@ -9,8 +9,8 @@ import org.apache.kafka.streams.processor.Punctuator;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
 
+import java.time.Duration;
 import java.util.Locale;
-import java.util.Properties;
 
 public class WordCountProcessorSupplier implements ProcessorSupplier<String, String> {
     public class WordCountProcessor implements Processor<String, String> {
@@ -22,7 +22,7 @@ public class WordCountProcessorSupplier implements ProcessorSupplier<String, Str
         public void init(final ProcessorContext context) {
             // TODO
             this.context = context;
-            this.context.schedule(1000, PunctuationType.STREAM_TIME, new Punctuator() {
+            this.context.schedule(Duration.ofMillis(1000), PunctuationType.STREAM_TIME, new Punctuator() {
                 @Override
                 public void punctuate(long timestamp) {
                     try (KeyValueIterator<String, Integer> iter = kvStore.all()) {
@@ -39,9 +39,9 @@ public class WordCountProcessorSupplier implements ProcessorSupplier<String, Str
         }
 
         @Override
-        public void process(String dummy, String line) {
+        public void process(String recordKey, String recordValue) {
             // TODO
-            String[] words = line.toLowerCase(Locale.getDefault()).split(" ");
+            String[] words = recordValue.toLowerCase(Locale.getDefault()).split(" ");
             for (String word : words) {
                 Integer oldValue = this.kvStore.get(word);
                 if (oldValue == null) {

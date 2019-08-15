@@ -2,6 +2,9 @@ package streams;
 
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
+
+import java.time.Duration;
+
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
@@ -19,13 +22,13 @@ public class CustomMaxAggregatorSupplier implements ProcessorSupplier<String, Lo
         @Override
         public void init(ProcessorContext context) {
             this.context = context;
-            context.schedule(60000, PunctuationType.WALL_CLOCK_TIME, new Punctuator() {
+            context.schedule(Duration.ofMillis(60000), PunctuationType.WALL_CLOCK_TIME, new Punctuator() {
                 @Override
                 public void punctuate(long timestamp) {
                     flushStore();
                 }
             });
-            context.schedule(10000, PunctuationType.STREAM_TIME, new Punctuator() {
+            context.schedule(Duration.ofMillis(10000), PunctuationType.STREAM_TIME, new Punctuator() {
                 @Override
                 public void punctuate(long timestamp) {
                     flushStore();

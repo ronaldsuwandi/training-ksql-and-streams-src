@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   zookeeper:
-    image: "confluentinc/cp-zookeeper:5.0.0"
+    image: "confluentinc/cp-zookeeper:5.3.0"
     hostname: zookeeper
     networks:
       - streams-net
@@ -10,7 +10,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
-    image: "confluentinc/cp-enterprise-kafka:5.0.0"
+    image: "confluentinc/cp-enterprise-kafka:5.3.0"
     hostname: kafka
     depends_on:
       - zookeeper
@@ -28,7 +28,7 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
 
   control-center:
-    image: confluentinc/cp-enterprise-control-center:5.0.0
+    image: confluentinc/cp-enterprise-control-center:5.3.0
     hostname: control-center
     restart: always
     depends_on:
@@ -49,15 +49,18 @@ services:
       CONTROL_CENTER_STREAMS_NUM_STREAM_THREADS: 1
       CONTROL_CENTER_STREAMS_CONSUMER_REQUEST_TIMEOUT_MS: "960032"
 
-  base:
-    image: confluentinc/cp-kafka-connect:5.0.0
-    hostname: base
+  tools:
+    image: cnfltraining/training-tools:19.06
+    hostname: tools
+    volumes:
+      - .:/root/confluent-streams/solution/m-13/processor-sample
+    working_dir: /root/confluent-streams/solution/m-13/processor-sample
     networks:
       - streams-net
-    command: /bin/sh
+    command: /bin/bash
     tty: true
     environment:
-      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.0.0.jar
+      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.2.1.jar
 
 networks:
   streams-net:

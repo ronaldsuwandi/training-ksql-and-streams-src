@@ -12,6 +12,7 @@ import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyTestDriver;
 import org.apache.kafka.streams.test.ConsumerRecordFactory;
 import org.apache.kafka.streams.test.OutputVerifier;
+import org.hamcrest.MatcherAssert;
 
 import java.util.*;
 
@@ -62,7 +63,7 @@ public class ProcessorTest {
     @Test
     public void shouldNotUpdateStoreForSmallerValue() {
         testDriver.pipeInput(recordFactory.create("input-topic", "a", 1L, 9999L));
-        Assert.assertThat(store.get("a"), equalTo(21L));
+        MatcherAssert.assertThat(store.get("a"), equalTo(21L));
         OutputVerifier.compareKeyValue(testDriver.readOutput(
             "result-topic", stringDeserializer, longDeserializer), "a", 21L);
         Assert.assertNull(testDriver.readOutput(
@@ -73,7 +74,7 @@ public class ProcessorTest {
     @Test
     public void shouldUpdateStoreForLargerValue() {
         testDriver.pipeInput(recordFactory.create("input-topic", "a", 42L, 9999L));
-        Assert.assertThat(store.get("a"), equalTo(42L));
+        MatcherAssert.assertThat(store.get("a"), equalTo(42L));
         OutputVerifier.compareKeyValue(testDriver.readOutput("result-topic", stringDeserializer, longDeserializer), "a", 42L);
         Assert.assertNull(testDriver.readOutput("result-topic", stringDeserializer, longDeserializer));
     }
@@ -81,7 +82,7 @@ public class ProcessorTest {
     @Test
     public void shouldUpdateStoreForNewKey() {
         testDriver.pipeInput(recordFactory.create("input-topic", "b", 21L, 9999L));
-        Assert.assertThat(store.get("b"), equalTo(21L));
+        MatcherAssert.assertThat(store.get("b"), equalTo(21L));
         OutputVerifier.compareKeyValue(testDriver.readOutput("result-topic", stringDeserializer, longDeserializer), "a", 21L);
         OutputVerifier.compareKeyValue(testDriver.readOutput("result-topic", stringDeserializer, longDeserializer), "b", 21L);
         Assert.assertNull(testDriver.readOutput("result-topic", stringDeserializer, longDeserializer));
