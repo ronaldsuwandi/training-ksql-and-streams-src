@@ -119,9 +119,8 @@ services:
     volumes:
       - .:/root/confluent-streams/labs/m-14/secure-app
       - ./scripts/security:/etc/kafka/secrets
+    working_dir: /root/confluent-streams/labs/m-14/secure-app
     command: /bin/bash
-    environment:
-      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.2.1.jar
     tty: true
 
 

@@ -2,7 +2,7 @@ version: '3.5'
 services:
   zookeeper:
     hostname: zookeeper
-    image: "confluentinc/cp-zookeeper:5.0.0"
+    image: "confluentinc/cp-zookeeper:5.3.0"
     networks:
       - streams-net
     environment:
@@ -10,7 +10,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
-    image: "confluentinc/cp-enterprise-kafka:5.0.0"
+    image: "confluentinc/cp-enterprise-kafka:5.3.0"
     hostname: kafka
     networks:
       - streams-net
@@ -29,7 +29,7 @@ services:
 
   schema-registry:
     hostname: schema-registry
-    image: "confluentinc/cp-schema-registry:5.0.0"
+    image: "confluentinc/cp-schema-registry:5.3.0"
     networks:
       - streams-net
     environment:
@@ -39,7 +39,7 @@ services:
 
   ksql-server:
     hostname: ksql-server
-    image: "confluentinc/cp-ksql-server:5.0.0"
+    image: "confluentinc/cp-ksql-server:5.3.0"
     ports:
       - "8088:8088"
     networks:
@@ -59,7 +59,7 @@ services:
 
   control-center:
     hostname: control-center
-    image: confluentinc/cp-enterprise-control-center:5.0.0
+    image: confluentinc/cp-enterprise-control-center:5.3.0
     restart: always
     networks:
       - streams-net
@@ -79,14 +79,14 @@ services:
       CONTROL_CENTER_KSQL_ADVERTISED_URL: "http://localhost:8088"
       CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
 
-  base:
-    image: cnfltraining/training-tools:5.1.2-ksql
-    hostname: base
+  tools:
+    image: cnfltraining/training-tools:19.06
+    hostname: tools
     networks:
       - streams-net
     volumes:
       - .:/root/confluent-streams/labs/m-08
-    command: /bin/sh
+    command: /bin/bash
     tty: true
 
 

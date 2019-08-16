@@ -44,6 +44,7 @@ services:
       - "4444:4444"
     volumes:
       - .:/root/confluent-streams/labs/m-13
+    working_dir: /root/confluent-streams/labs/m-13
     command: /bin/bash
     tty: true
 

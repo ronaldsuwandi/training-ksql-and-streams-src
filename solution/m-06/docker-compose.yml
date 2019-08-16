@@ -2,7 +2,7 @@ version: '3.5'
 services:
   zookeeper:
     hostname: zookeeper
-    image: "confluentinc/cp-zookeeper:5.0.0"
+    image: "confluentinc/cp-zookeeper:5.3.0"
     networks:
       - kafka-net
     environment:
@@ -10,7 +10,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
-    image: "confluentinc/cp-enterprise-kafka:5.0.0"
+    image: "confluentinc/cp-enterprise-kafka:5.3.0"
     hostname: kafka
     networks:
       - kafka-net
@@ -27,7 +27,7 @@ services:
 
   schema-registry:
     hostname: schema-registry
-    image: "confluentinc/cp-schema-registry:5.0.0"
+    image: "confluentinc/cp-schema-registry:5.3.0"
     networks:
       - kafka-net
     environment:
@@ -38,7 +38,7 @@ services:
 
   ksql-server:
     hostname: ksql-server
-    image: "confluentinc/cp-ksql-server:5.0.0"
+    image: "confluentinc/cp-ksql-server:5.3.0"
     ports:
       - "8088:8088"
     networks:
@@ -56,14 +56,15 @@ services:
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       KSQL_KSQL_SERVER_UI_ENABLED: "false"
 
-  base:
-    image: cnfltraining/training-tools:5.1.2-ksql
-    hostname: base
+  tools:
+    image: cnfltraining/training-tools:19.06
+    hostname: tools
     networks:
       - kafka-net
     volumes:
-      - .:/root/confluent-streams/labs/m-06/
-    command: /bin/sh
+      - .:/root/confluent-streams/labs/m-06
+    working_dir: /root/confluent-streams/labs/m-06
+    command: /bin/bash
     tty: true
 
 

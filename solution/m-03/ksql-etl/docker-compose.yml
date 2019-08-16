@@ -1,7 +1,7 @@
 version: "3.5"
 services:
   zookeeper:
-    image: "confluentinc/cp-zookeeper:5.0.0"
+    image: "confluentinc/cp-zookeeper:5.3.0"
     networks:
       - ksql-net
     environment:
@@ -9,7 +9,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
-    image: "confluentinc/cp-enterprise-kafka:5.0.0"
+    image: "confluentinc/cp-enterprise-kafka:5.3.0"
     depends_on:
       - zookeeper
     networks:
@@ -26,7 +26,7 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
 
   schema-registry:
-    image: "confluentinc/cp-schema-registry:5.0.0"
+    image: "confluentinc/cp-schema-registry:5.3.0"
     depends_on:
       - zookeeper
       - kafka
@@ -38,7 +38,7 @@ services:
       SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
 
   ksql-server:
-    image: "confluentinc/cp-ksql-server:5.0.0"
+    image: "confluentinc/cp-ksql-server:5.3.0"
     depends_on:
       - kafka
       - connect
@@ -60,14 +60,14 @@ services:
       KSQL_KSQL_SERVER_UI_ENABLED: "false"
 
   ksql-cli:
-    image: confluentinc/cp-ksql-cli:5.0.0
+    image: confluentinc/cp-ksql-cli:5.3.0
     networks:
       - ksql-net
     entrypoint: /bin/sh
     tty: true
 
   connect:
-    image: confluentinc/cp-kafka-connect:5.0.0
+    image: confluentinc/cp-kafka-connect:5.3.0
     depends_on:
       - zookeeper
       - kafka
@@ -104,7 +104,7 @@ services:
       CONNECT_REST_HOST_NAME: "connect"
 
   control-center:
-    image: confluentinc/cp-enterprise-control-center:5.0.0
+    image: confluentinc/cp-enterprise-control-center:5.3.0
     depends_on:
       - zookeeper
       - kafka
