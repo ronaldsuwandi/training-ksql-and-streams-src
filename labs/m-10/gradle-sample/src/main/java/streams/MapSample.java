@@ -19,25 +19,17 @@ public class MapSample {
         System.out.println("*** Starting Map Sample Application ***");
 	
         Properties settings = new Properties();
-        settings.put(StreamsConfig.APPLICATION_ID_CONFIG, "map-sample-v0.1.0");
-        settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
+        // TODO: Configure application.id and bootstrap.servers properties using the StreamsConfig class
 
-        final Serde<String> stringSerde = Serdes.String();
-        StreamsBuilder builder = new StreamsBuilder();
-        KStream<String, String> lines = builder
-            .stream("lines-topic", Consumed.with(stringSerde, stringSerde));
-        KStream<String, String> transformed = lines
-            .map((key, value) -> KeyValue.pair(key, value.toLowerCase()));
-        transformed.to("lines-lower-topic", Produced.with(stringSerde, stringSerde));
-        Topology topology = builder.build();
+        
+        // TODO: Define the processor topology using the StreamsBuilder class
 
-        KafkaStreams streams = new KafkaStreams(topology, settings);
-        streams.start();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("### Stopping Map Sample Application ###");
-            streams.close();
-        }));
+        // TODO: Create and start the KafkaStreams app
+
+
+        // TODO: Add a shutdown hook for graceful termination
+
     }
 }
 
