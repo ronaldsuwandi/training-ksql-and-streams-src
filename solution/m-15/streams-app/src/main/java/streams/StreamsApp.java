@@ -72,7 +72,7 @@ public class StreamsApp {
                 return v;
             })
             .groupByKey(Grouped.with(stringSerde, tempSerde))
-            .windowedBy(TimeWindows.of(Duration.ofMinutes(60)))
+            .windowedBy(TimeWindows.of(Duration.ofMinutes(1)))
             .reduce((aggValue, newValue) -> newValue.temperature > aggValue.temperature ? newValue : aggValue)
             .toStream()
             .to(OUTPUT_TOPIC, Produced.with(windowedStringSerde, tempSerde));
