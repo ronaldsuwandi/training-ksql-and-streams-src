@@ -9,8 +9,8 @@ import org.apache.kafka.streams.processor.Punctuator;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
 
+import java.time.Duration;
 import java.util.Locale;
-import java.util.Properties;
 
 public class WordCountProcessorSupplier implements ProcessorSupplier<String, String> {
     public class WordCountProcessor implements Processor<String, String> {
@@ -21,11 +21,36 @@ public class WordCountProcessorSupplier implements ProcessorSupplier<String, Str
         @SuppressWarnings("unchecked")
         public void init(final ProcessorContext context) {
             // TODO
+            this.context = context;
+            this.context.schedule(Duration.ofMillis(1000), PunctuationType.STREAM_TIME, new Punctuator() {
+                @Override
+                public void punctuate(long timestamp) {
+                    try (KeyValueIterator<String, Integer> iter = kvStore.all()) {
+                        System.out.println("----------- " + timestamp + " ----------- ");
+                        while (iter.hasNext()) {
+                            KeyValue<String, Integer> entry = iter.next();
+                            System.out.println("[" + entry.key + ", " + entry.value + "]");
+                            context.forward(entry.key, entry.value.toString());
+                        }
+                    }
+                }
+            });
+            this.kvStore = (KeyValueStore<String, Integer>) context.getStateStore("Counts");
         }
 
         @Override
         public void process(String dummy, String line) {
             // TODO
+            String[] words = line.toLowerCase(Locale.getDefault()).split(" ");
+            for (String word : words) {
+                Integer oldValue = this.kvStore.get(word);
+                if (oldValue == null) {
+                    this.kvStore.put(word, 1);
+                } else {
+                    this.kvStore.put(word, oldValue + 1);
+                }
+            }
+            context.commit();
         }
     
         @Override

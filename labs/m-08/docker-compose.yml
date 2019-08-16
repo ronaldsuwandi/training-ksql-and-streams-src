@@ -86,6 +86,7 @@ services:
       - streams-net
     volumes:
       - .:/root/confluent-streams/labs/m-08
+    working_dir: /root/confluent-streams/labs/m-08
     command: /bin/bash
     tty: true
 

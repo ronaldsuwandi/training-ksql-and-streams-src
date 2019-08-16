@@ -1,7 +1,7 @@
 version: "3.5"
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:5.0.0
+    image: confluentinc/cp-zookeeper:5.3.0
     hostname: zookeeper
     restart: always
     hostname: zookeeper
@@ -20,7 +20,7 @@ services:
       - "2181:2181"
 
   kafka:
-    image: confluentinc/cp-enterprise-kafka:5.0.0
+    image: confluentinc/cp-enterprise-kafka:5.3.0
     hostname: kafka
     container_name: kafka
     depends_on:
@@ -76,7 +76,7 @@ services:
       KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/broker_jaas.conf
 
   control-center:
-    image: confluentinc/cp-enterprise-control-center:5.0.0
+    image: confluentinc/cp-enterprise-control-center:5.3.0
     hostname: control-center
     container_name: control-center
     restart: always
@@ -111,14 +111,16 @@ services:
       CONTROL_CENTER_STREAMS_SSL_KEY_PASSWORD: confluent
       CONTROL_CENTER_STREAMS_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
 
-  base:
-    image: cnfltraining/training-tools:5.1.2-ksql
-    hostname: base
+  tools:
+    image: cnfltraining/training-tools:19.06
+    hostname: tools
     networks:
       - streams-net
     volumes:
       - .:/root/confluent-streams/labs/m-14/secure-app
-    command: /bin/sh
+      - ./scripts/security:/etc/kafka/secrets
+    working_dir: /root/confluent-streams/labs/m-14/secure-app
+    command: /bin/bash
     tty: true
 
 

@@ -1,0 +1,14 @@
+version: "3.5"
+services:
+  producer:
+    image: temp-producer:latest
+    networks:
+      - streams-net
+  
+  streams-app:
+    image: streams-app:latest
+    networks:
+      - streams-net
+
+networks:
+  streams-net:

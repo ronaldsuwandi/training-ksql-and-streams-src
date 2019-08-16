@@ -42,9 +42,9 @@ services:
       - streams-net
     volumes:
       - .:/root/confluent-streams/labs/m-10
+    working_dir: /root/confluent-streams/labs/m-10
     command: /bin/bash
     tty: true
-
 
 
 networks:

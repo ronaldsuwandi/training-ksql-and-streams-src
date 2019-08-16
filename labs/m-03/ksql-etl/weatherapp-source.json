@@ -1,0 +1,14 @@
+{ 
+    "name": "weatherapp-source", 
+    "config": { 
+        "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector", 
+        "tasks.max": 1, 
+        "connection.url": "jdbc:postgresql://weather-db:5432/weather", 
+        "connection.user": "weatherapp",
+        "connection.password": "weatherapp123",
+        "table.whitelist": "stations,readings", 
+        "mode": "incrementing", 
+        "incrementing.column.name": "id", 
+        "topic.prefix": "postgres-" 
+    }
+}

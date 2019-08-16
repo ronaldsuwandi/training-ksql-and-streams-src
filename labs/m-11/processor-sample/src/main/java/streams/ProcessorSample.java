@@ -3,7 +3,6 @@ package streams;
 import java.util.Properties;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
@@ -26,6 +25,17 @@ public class ProcessorSample {
 
     private static Topology getTopology(){
         // TODO: here we construct the Kafka Streams topology
+        Topology builder = new Topology();
+        builder.addSource("Source", "lines-topic");
+        builder.addProcessor("Process", new WordCountProcessorSupplier(), "Source");
+        builder.addStateStore(Stores.keyValueStoreBuilder(
+                Stores.inMemoryKeyValueStore("Counts"),
+                Serdes.String(),
+                Serdes.Integer()),
+                "Process");
+        builder.addSink("Sink", "word-count-topic", "Process");
+
+        return builder;
     }
 
     private static Properties getConfig(){

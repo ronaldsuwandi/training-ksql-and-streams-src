@@ -2,6 +2,7 @@ package streams;
 
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +16,7 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.kstream.Serialized;
+import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.kstream.TimeWindows;
@@ -70,8 +71,8 @@ public class StreamsApp {
                 try { TimeUnit.MILLISECONDS.sleep(300); } catch(Exception ex) {}      // artificially delay execution
                 return v;
             })
-            .groupByKey(Serialized.with(stringSerde, tempSerde))
-            .windowedBy(TimeWindows.of(TimeUnit.MINUTES.toMillis(60)))
+            .groupByKey(Grouped.with(stringSerde, tempSerde))
+            .windowedBy(TimeWindows.of(Duration.ofMinutes(1)))
             .reduce((aggValue, newValue) -> newValue.temperature > aggValue.temperature ? newValue : aggValue)
             .toStream()
             .to(OUTPUT_TOPIC, Produced.with(windowedStringSerde, tempSerde));
