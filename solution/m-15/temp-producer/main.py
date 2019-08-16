@@ -24,7 +24,9 @@ while True:
 
     stationIndex = random.randint(0, 9)
     station = stations[stationIndex]
-    diff = tempAverage[stationIndex] - lastTemperature[stationIndex]
+    temperature = lastTemperature[stationIndex]
+    average = tempAverage[stationIndex]
+    diff = average - temperature
     rand = random.randint(0, 9)
     if rand < 4:         # 40% chance that temperature stays the same
         delta = 0
@@ -32,11 +34,11 @@ while True:
         delta = 1
     else:
         delta = -1
-    if diff < 0:
+    if temperature > average:
         delta = -delta
-    temperature = lastTemperature[stationIndex] + delta
-    lastTemperature[stationIndex] = temperature
-    # msg_value = temperature.to_bytes(4, byteorder='big', signed=True)
+    temperature += delta
+    lastTemperature[stationIndex] = temperature 
+
     msg_value = json.dumps({
         "station": station,
         "temperature": temperature
