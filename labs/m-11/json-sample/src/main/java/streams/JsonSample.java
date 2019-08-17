@@ -45,26 +45,16 @@ public class JsonSample {
         final Serde<TempReading> temperatureSerde = getJsonSerde();
 
         // TODO: here we construct the Kafka Streams topology
-        builder.stream("temperatures-topic", Consumed.with(stringSerde, temperatureSerde))
-            .filter((key,value) -> value.temperature > 25)
-            .to("high-temperatures-topic", Produced.with(stringSerde, temperatureSerde));
 
-        Topology topology = builder.build();
-        return topology;
     }
 
     private static Serde<TempReading> getJsonSerde(){
-        // TODO: create the JSON serde
+        
         Map<String, Object> serdeProps = new HashMap<>();
         serdeProps.put("json.value.type", TempReading.class);
 
-        final Serializer<TempReading> temperatureSerializer = new KafkaJsonSerializer<>();
-        temperatureSerializer.configure(serdeProps, false);
-                
-        final Deserializer<TempReading> temperatureDeserializer = new KafkaJsonDeserializer<>();
-        temperatureDeserializer.configure(serdeProps, false);
+        // TODO: create a JSON serde for the TempReading class using KafkaJson serdes
 
-        return Serdes.serdeFrom(temperatureSerializer, temperatureDeserializer);
     }
 
     private static Properties getConfig(){
