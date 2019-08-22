@@ -419,7 +419,7 @@ $ docker-compose exec connect \
 
 === Run the Dashboard
 
-. Open a new browser window at http://localhost:3000 an observe how the minimum and maximum temperatures per station are displayed and how they change over time as new temperature readings flow into the system.
+. Open a new browser window at http://localhost:3000/dashboard an observe how the minimum and maximum temperatures per station are displayed and how they change over time as new temperature readings flow into the system.
 
 == Appendix
 Here we show some techniques in and around topics using DELIMITED and AVRO message format.
