@@ -1,9 +1,5 @@
 = Kafka ETL Pipeline
 
-== Prerequisites
-
-. Please note that *Kafka Connect* does not include a JDBC driver for *MariaDB* by default...
-.. Download the JDBC driver for MariaDB from here: https://mariadb.com/downloads/connector
 
 == Running the Pipeline
 
@@ -136,6 +132,7 @@ The Dashboard DB is a MariaDB instance and can be easily administrated by e.b. u
 .. Table Whitelist: `stations`, `readings`
 .. Table Loading Mode: `incrementing`
 .. Incrementing Column Name: `id`
+.. Topic Prefix: `postgres-`
 . Click *Continue* and then *Save&Finish*
 
 == Configure Connect from the Command Line
@@ -222,7 +219,6 @@ $ docker-compose exec connect kafka-avro-console-consumer \
 
 We want to use an instance of *MariaDB* as a sink. We stream the `postgres-stations` topic directly to this sink.
 
-. Make sure you have followed the *Prerequisites* carefully otherwise the JDBC driver for *MariaDB* is not available!
 . Add the sink:
 +
 [source,bash]
@@ -378,7 +374,6 @@ It should give a similar output as above...
 
 We want to use an instance of *MariaDB* as a sink.
 
-. Make sure you have followed the *Prerequisites* carefully otherwise the JDBC driver for *MariaDB* is not available!
 . Add the sink:
 +
 [source,bash]
