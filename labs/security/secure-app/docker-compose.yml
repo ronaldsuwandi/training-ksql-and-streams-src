@@ -114,12 +114,13 @@ services:
   tools:
     image: cnfltraining/training-tools:19.06
     hostname: tools
+    container_name: tools
     networks:
       - streams-net
     volumes:
-      - .:/root/confluent-streams/labs/m-14/secure-app
+      - .:/root/confluent-streams/labs/security/secure-app
       - ./scripts/security:/etc/kafka/secrets
-    working_dir: /root/confluent-streams/labs/m-14/secure-app
+    working_dir: /root/confluent-streams/labs/security/secure-app
     command: /bin/bash
     tty: true
 

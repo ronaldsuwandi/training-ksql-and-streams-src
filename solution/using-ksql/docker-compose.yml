@@ -2,6 +2,7 @@ version: '3.5'
 services:
   zookeeper:
     hostname: zookeeper
+    container_name: zookeeper
     image: "confluentinc/cp-zookeeper:5.3.0"
     networks:
       - kafka-net
@@ -12,6 +13,7 @@ services:
   kafka:
     image: "confluentinc/cp-enterprise-kafka:5.3.0"
     hostname: kafka
+    container_name: kafka
     networks:
       - kafka-net
     environment:
@@ -27,17 +29,19 @@ services:
 
   schema-registry:
     hostname: schema-registry
+    container_name: schema-registry
     image: "confluentinc/cp-schema-registry:5.3.0"
     networks:
       - kafka-net
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
+      SCHEMA_REGISTRY_BOOTSTRAP_SERVERS: kafka:9092
       SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
 
 
   ksql-server:
     hostname: ksql-server
+    container_name: ksql-server
     image: "confluentinc/cp-ksql-server:5.3.0"
     ports:
       - "8088:8088"
@@ -59,11 +63,12 @@ services:
   tools:
     image: cnfltraining/training-tools:19.06
     hostname: tools
+    container_name: tools
     networks:
       - kafka-net
     volumes:
-      - .:/root/confluent-streams/labs/m-06
-    working_dir: /root/confluent-streams/labs/m-06
+      - .:/root/confluent-streams/labs/using-ksql
+    working_dir: /root/confluent-streams/labs/using-ksql
     command: /bin/bash
     tty: true
 

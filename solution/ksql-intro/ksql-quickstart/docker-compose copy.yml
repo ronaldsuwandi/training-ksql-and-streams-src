@@ -2,7 +2,6 @@ version: '3.5'
 services:
   zookeeper:
     hostname: zookeeper
-    container_name: zookeeper
     image: "confluentinc/cp-zookeeper:5.3.0"
     networks:
       - ksql-net
@@ -12,7 +11,6 @@ services:
 
   kafka:
     hostname: kafka
-    container_name: kafka
     image: "confluentinc/cp-enterprise-kafka:5.3.0"
     networks:
       - ksql-net
@@ -29,7 +27,6 @@ services:
       
   schema-registry:
     hostname: schema-registry
-    container_name: schema-registry
     image: "confluentinc/cp-schema-registry:5.3.0"
     networks:
       - ksql-net
@@ -41,7 +38,6 @@ services:
   # Runs the Kafka KSQL data generator for topic called "pageviews"
   ksql-datagen-pageviews:
     hostname: ksql-datagen-pageviews
-    container_name: ksql-datagen-pageviews
     image: "confluentinc/ksql-examples:5.3.0"
     networks:
       - ksql-net
@@ -65,7 +61,6 @@ services:
   # Runs the Kafka KSQL data generator for topic called "users"
   ksql-datagen-users:
     hostname: ksql-datagen-users
-    container_name: ksql-datagen-users
     image: "confluentinc/ksql-examples:5.3.0"
     networks:
       - ksql-net
@@ -88,7 +83,6 @@ services:
 
   ksql-server:
     hostname: ksql-server
-    container_name: ksql-server
     image: "confluentinc/cp-ksql-server:5.3.0"
     ports:
       - "8088:8088"
@@ -110,7 +104,6 @@ services:
   tools:
     image: cnfltraining/training-tools:19.06
     hostname: tools
-    container_name: tools
     networks:
       - ksql-net
     volumes:

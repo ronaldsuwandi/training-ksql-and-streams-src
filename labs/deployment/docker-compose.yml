@@ -3,6 +3,7 @@ services:
   zookeeper:
     image: "confluentinc/cp-zookeeper:5.3.0"
     hostname: zookeeper
+    container_name: zookeeper
     networks:
       - streams-net
     environment:
@@ -12,6 +13,7 @@ services:
   kafka:
     image: "confluentinc/cp-enterprise-kafka:5.3.0"
     hostname: kafka
+    container_name: kafka
     networks:
       - streams-net
     environment:
@@ -30,16 +32,18 @@ services:
   schema-registry:
     image: "confluentinc/cp-schema-registry:5.3.0"
     hostname: schema-registry
+    contianer_name: schema-registry
     networks:
       - streams-net
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
       SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
 
   ksql-server:
     image: "confluentinc/cp-ksql-server:5.3.0"
     hostname: ksql-server
+    container_name: ksql-server
     ports:
       - "8088:8088"
     networks:
@@ -60,6 +64,7 @@ services:
   control-center:
     image: confluentinc/cp-enterprise-control-center:5.3.0
     hostname: control-center
+    container_name: control-center
     restart: always
     networks:
       - streams-net
@@ -85,8 +90,8 @@ services:
     networks:
       - streams-net
     volumes:
-      - .:/root/confluent-streams/labs/m-15
-    working_dir: /root/confluent-streams/labs/m-15
+      - .:/root/confluent-streams/labs/deployment
+    working_dir: /root/confluent-streams/labs/deployment
     command: /bin/bash
     tty: true
 
