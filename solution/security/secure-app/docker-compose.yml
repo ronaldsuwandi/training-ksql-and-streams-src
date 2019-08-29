@@ -1,0 +1,129 @@
+version: "3.5"
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.3.0
+    hostname: zookeeper
+    restart: always
+    hostname: zookeeper
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      ZOOKEEPER_TICK_TIME: "2000"
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/zookeeper_jaas.conf
+                  -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+    volumes:
+      - $PWD/scripts/security:/etc/kafka/secrets
+    networks:
+      - streams-net
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-enterprise-kafka:5.3.0
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    volumes:
+      - $PWD/scripts/security:/etc/kafka/secrets
+    networks:
+      - streams-net
+    ports:
+      - "9091:9091"
+      - "29091:29091"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: SASL_SSL:SASL_SSL,SSL:SSL,SASL_SSL_HOST:SASL_SSL,PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: SASL_SSL
+      KAFKA_ADVERTISED_LISTENERS: SASL_SSL://kafka:9091,SASL_SSL_HOST://localhost:29091,PLAINTEXT://kafka:10091,SSL://kafka:11091
+      KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.auth.SimpleAclAuthorizer
+      KAFKA_SUPER_USERS: User:client;User:schemaregistry;User:broker;User:ANONYMOUS
+      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=INFO"
+      KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      KAFKA_BROKER_ID: 1
+      KAFKA_BROKER_RACK: "r1"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka:9091"
+      CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: SASL_SSL
+      CONFLUENT_METRICS_REPORTER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required \
+        username=\"client\" \
+        password=\"client-secret\";"
+      CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: PLAIN
+      CONFLUENT_METRICS_REPORTER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.client.truststore.jks
+      CONFLUENT_METRICS_REPORTER_SSL_TRUSTSTORE_PASSWORD: confluent
+      CONFLUENT_METRICS_REPORTER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.client.keystore.jks
+      CONFLUENT_METRICS_REPORTER_SSL_KEYSTORE_PASSWORD: confluent
+      CONFLUENT_METRICS_REPORTER_SSL_KEY_PASSWORD: confluent
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_REPORTER_MAX_REQUEST_SIZE: 10485760
+      # To avoid race condition with control-center
+      CONFLUENT_METRICS_REPORTER_TOPIC_CREATE: "false"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_JMX_PORT: 9991
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka.kafka.keystore.jks
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka_keystore_creds
+      KAFKA_SSL_KEY_CREDENTIALS: kafka_sslkey_creds
+      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.kafka.truststore.jks
+      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka_truststore_creds
+      # enables 2-way authentication
+      KAFKA_SSL_CLIENT_AUTH: "required"
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/broker_jaas.conf
+
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:5.3.0
+    hostname: control-center
+    container_name: control-center
+    restart: always
+    depends_on:
+      - zookeeper
+      - kafka
+    ports:
+      - "9021:9021"
+    volumes:
+      - $PWD/scripts/security:/etc/kafka/secrets
+    networks:
+      - streams-net
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: "kafka:9091"
+      CONTROL_CENTER_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_REPLICATION: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_REPLICATION: 1
+      CONTROL_CENTER_COMMAND_TOPIC_REPLICATION: 1
+      CONTROL_CENTER_METRICS_TOPIC_REPLICATION: 1
+      CONTROL_CENTER_STREAMS_NUM_STREAM_THREADS: 1
+      CONTROL_CENTER_STREAMS_CONSUMER_REQUEST_TIMEOUT_MS: "960032"
+      CONTROL_CENTER_STREAMS_SECURITY_PROTOCOL: SASL_SSL
+      CONTROL_CENTER_STREAMS_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required \
+        username=\"client\" \
+        password=\"client-secret\";"
+      CONTROL_CENTER_STREAMS_SASL_MECHANISM: PLAIN
+      CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.client.truststore.jks
+      CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_PASSWORD: confluent
+      CONTROL_CENTER_STREAMS_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.client.keystore.jks
+      CONTROL_CENTER_STREAMS_SSL_KEYSTORE_PASSWORD: confluent
+      CONTROL_CENTER_STREAMS_SSL_KEY_PASSWORD: confluent
+      CONTROL_CENTER_STREAMS_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
+
+  tools:
+    image: cnfltraining/training-tools:19.06
+    hostname: tools
+    networks:
+      - streams-net
+    volumes:
+      - .:/root/confluent-streams/labs/m-14/secure-app
+      - ./scripts/security:/etc/kafka/secrets
+    working_dir: /root/confluent-streams/labs/m-14/secure-app
+    command: /bin/bash
+    tty: true
+
+
+
+networks:
+  streams-net:
