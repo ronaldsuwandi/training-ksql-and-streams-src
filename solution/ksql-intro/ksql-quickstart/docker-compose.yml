@@ -102,7 +102,7 @@ services:
       KSQL_KSQL_SERVER_UI_ENABLED: "false"
 
   tools:
-    image: cnfltraining/training-tools:19:06
+    image: cnfltraining/training-tools:19.06
     hostname: tools
     networks:
       - ksql-net
