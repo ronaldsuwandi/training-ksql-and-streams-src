@@ -32,7 +32,7 @@ services:
   schema-registry:
     image: "confluentinc/cp-schema-registry:5.3.0"
     hostname: schema-registry
-    contianer_name: schema-registry
+    container_name: schema-registry
     networks:
       - streams-net
     environment:
