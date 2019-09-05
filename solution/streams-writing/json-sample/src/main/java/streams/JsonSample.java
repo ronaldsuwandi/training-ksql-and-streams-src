@@ -18,6 +18,13 @@ import io.confluent.kafka.serializers.KafkaJsonSerializer;
 import io.confluent.kafka.serializers.KafkaJsonDeserializer;
 
 public class JsonSample {
+    
+    /*
+    This application reads temperature data from an input topic,
+    filters for teperatures higher than 25 degrees,
+    and outputs that data to a new output topic.
+    */
+
     final static String APPLICATION_ID = "json-sample-v0.1.0";
     final static String APPLICATION_NAME = "JSON Sample";
 

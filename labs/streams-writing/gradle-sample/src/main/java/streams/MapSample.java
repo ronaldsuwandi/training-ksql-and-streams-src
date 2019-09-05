@@ -16,6 +16,10 @@ import org.apache.kafka.streams.kstream.Produced;
 
 
 public class MapSample {
+        /*
+    This application reads data from a topic whose keys are integers and whose values are sentence strings.
+    The input values are transformed to lower-case and output to a new topic.
+    */
     public static void main(String[] args) {
         System.out.println("*** Starting Map Sample Application ***");
 	
