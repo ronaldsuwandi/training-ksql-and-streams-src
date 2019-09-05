@@ -207,7 +207,7 @@ For more details please see the [quick start](https://docs.confluent.io/current/
     $ docker container run -it --rm \
         --network ksql-quickstart_demo-net \
         confluentinc/cp-enterprise-kafka:5.0.0 kafka-topics \
-            --zookeeper zookeeper:32181 \
+            --bootstrap-server kafka:9092 zookeeper:32181 \
             --list
     ```
 

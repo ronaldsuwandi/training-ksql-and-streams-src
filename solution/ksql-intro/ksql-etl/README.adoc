@@ -41,7 +41,7 @@ $ docker-compose exec kafka kafka-topics --create \
       --partitions 3 \
       --replication-factor 1 \
       --if-not-exists \
-      --zookeeper zookeeper:2181
+      --bootstrap-server kafka:9092
 ```
 
 . Create a topic `postgres-readings`:
@@ -52,7 +52,7 @@ $ docker-compose exec kafka kafka-topics --create \
       --partitions 3 \
       --replication-factor 1 \
       --if-not-exists \
-      --zookeeper zookeeper:2181
+      --bootstrap-server kafka:9092
 ```
 
 . Create a topic `EXTREME_TEMPERATURES`:
@@ -63,7 +63,7 @@ $ docker-compose exec kafka kafka-topics --create \
       --partitions 1 \
       --replication-factor 1 \
       --if-not-exists \
-      --zookeeper zookeeper:2181
+      --bootstrap-server kafka:9092
 ```
 
 === Running the Applications
@@ -438,7 +438,7 @@ $ docker-compose exec kafka kafka-topics --create \
       --partitions 1 \
       --replication-factor 1 \
       --if-not-exists \
-      --zookeeper zookeeper:2181
+      --bootstrap-server kafka:9092
 ```
 
 . Describe the topic:
@@ -447,7 +447,7 @@ $ docker-compose exec kafka kafka-topics --create \
 $ docker-compose exec kafka kafka-topics \
     --describe \
     --topic test-topic \
-    --zookeeper zookeeper:2181
+    --bootstrap-server kafka:9092
 ```
 
 . Create some data in the topic:
