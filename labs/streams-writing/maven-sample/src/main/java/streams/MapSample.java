@@ -1,6 +1,7 @@
 package streams;
 
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -25,10 +26,10 @@ public class MapSample {
         // TODO: Define the processor topology using the StreamsBuilder class
 
 
-        // TODO: Create and start the KafkaStreams app
+        // TODO: Create the KafkaStreams app
 
 
-        // TODO: Add a shutdown hook for graceful termination
+        // TODO: Add a shutdown hook for graceful termination and start the app
 
     }
 }
