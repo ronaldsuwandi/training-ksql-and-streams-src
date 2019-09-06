@@ -57,7 +57,7 @@ public class WordCountProcessorSupplier implements ProcessorSupplier<String, Str
             }
             /*
             Requesting a commit. This will flush state to local state stores
-            and commit consumer offset to upstream topics.
+            and commit state store changes to Kafka for durability.
             */
             context.commit();
         }
