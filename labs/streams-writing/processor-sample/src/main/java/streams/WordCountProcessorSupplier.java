@@ -20,7 +20,13 @@ public class WordCountProcessorSupplier implements ProcessorSupplier<String, Str
         @Override
         @SuppressWarnings("unchecked")
         public void init(final ProcessorContext context) {
-            // TODO: Create a ProcessorContext, schedule a Punctuator that pushes the kv store downstream every second, and retrieve the "Counts" state store
+
+            /*
+            TODO: Thoroughly document what exactly this code does. What is a ProcessorContext?
+            What is the schedule method doing? What is a punctuator? What is this word count
+            processor producing?
+            */
+
             this.context = context;
             this.context.schedule(Duration.ofMillis(1000), PunctuationType.STREAM_TIME, new Punctuator() {
                 @Override
@@ -42,7 +48,11 @@ public class WordCountProcessorSupplier implements ProcessorSupplier<String, Str
         public void process(String recordKey, String recordValue) {
             // TODO: Process each record to update the state store's word counts
 
-            
+
+            /*
+            Requesting a commit. This will flush state to local state stores
+            and commit consumer offset to upstream topics.
+            */
             context.commit();
         }
     

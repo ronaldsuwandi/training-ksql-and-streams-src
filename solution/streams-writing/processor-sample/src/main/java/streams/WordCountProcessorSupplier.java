@@ -20,7 +20,13 @@ public class WordCountProcessorSupplier implements ProcessorSupplier<String, Str
         @Override
         @SuppressWarnings("unchecked")
         public void init(final ProcessorContext context) {
-            // TODO
+
+            /*
+            In this code, we are scheduling a punctuation function to run every 1000 ms
+            (= 1 second) and forward all entries of the state store to the downstream processor
+            node. The content in the state store will be the counts per word accumulated so far.
+            */
+
             this.context = context;
             this.context.schedule(Duration.ofMillis(1000), PunctuationType.STREAM_TIME, new Punctuator() {
                 @Override
@@ -39,9 +45,8 @@ public class WordCountProcessorSupplier implements ProcessorSupplier<String, Str
         }
 
         @Override
-        public void process(String dummy, String line) {
-            // TODO
-            String[] words = line.toLowerCase(Locale.getDefault()).split(" ");
+        public void process(String recordKey, String recordValue) {
+            String[] words = recordValue.toLowerCase(Locale.getDefault()).split(" ");
             for (String word : words) {
                 Integer oldValue = this.kvStore.get(word);
                 if (oldValue == null) {
@@ -50,6 +55,10 @@ public class WordCountProcessorSupplier implements ProcessorSupplier<String, Str
                     this.kvStore.put(word, oldValue + 1);
                 }
             }
+            /*
+            Requesting a commit. This will flush state to local state stores
+            and commit consumer offset to upstream topics.
+            */
             context.commit();
         }
     

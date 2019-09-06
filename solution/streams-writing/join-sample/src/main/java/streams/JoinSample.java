@@ -1,7 +1,7 @@
 package streams;
 
+import java.time.Duration;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -16,6 +16,16 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
 
 public class JoinSample {
+
+    /*
+    This application performs a stream-stream join.
+    It takes a string value from a "left stream" and a string value from a "right stream"
+    and concatenates them together inside of brackets.
+    The output is produced to a new stream.
+    Remember that all stream-stream joins must be windowed since streams are unbounded.
+    This application will use a sliding window of 60 minutes.
+    */
+
     final static String APPLICATION_ID = "join-sample-v0.1.0";
     final static String APPLICATION_NAME = "Join Sample";
 
@@ -42,7 +52,7 @@ public class JoinSample {
         leftStream
             .join(rightStream,
                 (leftValue, rightValue) -> "[" + leftValue + ", " + rightValue + "]",
-                JoinWindows.of(TimeUnit.MINUTES.toMillis(60)),
+                JoinWindows.of(Duration.ofMinutes(60)),
                 Joined.with(stringSerde, stringSerde, stringSerde)
             )
             .to("joined-topic", Produced.with(stringSerde, stringSerde));
