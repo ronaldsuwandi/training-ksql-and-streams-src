@@ -49,7 +49,6 @@ public class ProcessorTest {
 
     @Test
     public void shouldFlushStoreForFirstInput() {
-        // TODO: add test code here
         ConsumerRecord<byte[],byte[]> inputRecord = 
             recordFactory.create("input-topic", "a", 1L, 9999L);
         testDriver.pipeInput(inputRecord);
