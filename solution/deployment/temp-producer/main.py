@@ -8,12 +8,11 @@ topic = "temperature-readings"
 stations = ["S-01", "S-02", "S-03", "S-04", "S-05", "S-06", "S-07", "S-08", "S-09", "S-10"]
 tempAverage = [10, 15, 8, 23, 7, 2, 22, 30, -3, 13]
 lastTemperature = [10, 15, 8, 23, 7, 2, 22, 30, -3, 13]
-epoch_time = int(time.time())
 
 p = Producer({'bootstrap.servers': 'kafka:9092'})
 
 def delivery_report(err, msg):
-    if err is not None:
+    if err:
         print('Message delivery failed: {}'.format(err))
     else:
         print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
@@ -26,7 +25,6 @@ while True:
     station = stations[stationIndex]
     temperature = lastTemperature[stationIndex]
     average = tempAverage[stationIndex]
-    diff = average - temperature
     rand = random.randint(0, 9)
     if rand < 4:         # 40% chance that temperature stays the same
         delta = 0
@@ -43,11 +41,9 @@ while True:
         "station": station,
         "temperature": temperature
     })
-    epoch_time += 1   # add one second to simulate one reading per second...
-    timestamp = int(epoch_time * 1000)   # convert to milli-seconds
 
     print(station + ", " + msg_value)   #str(temperature))
-    p.produce(topic, key=station, value=msg_value, timestamp=timestamp)     #, callback=delivery_report)
+    p.produce(topic, key=station, value=msg_value)     #, callback=delivery_report)
 
     time.sleep(0.1)     # sleep 100 ms
 

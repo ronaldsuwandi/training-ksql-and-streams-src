@@ -25,7 +25,6 @@ public class TempProducer {
         final String[] stations = {"S-01", "S-02", "S-03", "S-04", "S-05", "S-06", "S-07", "S-08", "S-09", "S-10"};
         final Integer[] tempAverage = {10, 15, 8, 23, 7, 2, 22, 30, -3, 13};
         Integer[] lastTemperature = {10, 15, 8, 23, 7, 2, 22, 30, -3, 13};
-        Long epoch_time = System.currentTimeMillis();
         while(true){
             Integer stationIndex = random.nextInt(9);
             String station = stations[stationIndex];
@@ -47,7 +46,6 @@ public class TempProducer {
             // create a JSON string
             String value = "{ \"station\": \"" + station + "\", \"temperature\": " + temperature.toString() + "}";
             ProducerRecord<String, String> rec = new ProducerRecord<>(topic, station, value);
-            epoch_time += 1000;         // add one second to simulate one reading per second...
 
             System.out.println("The record is: " + rec.key() + ", " + rec.value());
             producer.send(rec);
