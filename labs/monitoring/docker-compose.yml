@@ -44,8 +44,6 @@ services:
     container_name: tools
     networks:
       - streams-net
-    ports:
-      - "4444:4444"
     volumes:
       - .:/root/confluent-streams/labs/monitoring
     working_dir: /root/confluent-streams/labs/monitoring

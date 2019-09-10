@@ -12,7 +12,7 @@ public class MetricsReporter {
             System.out.println("--- Application Metrics ---");
             Map<MetricName, ? extends Metric> metrics = streams.metrics();
             for (Map.Entry<MetricName, ? extends Metric> metric: metrics.entrySet()){
-                System.out.println(metric.getKey().name() + ", " + metric.getValue().metricValue());
+                System.out.println(metric.getKey().toString() + ", " + metric.getValue().metricValue());
             }
             TimeUnit.SECONDS.sleep(10);
         }
