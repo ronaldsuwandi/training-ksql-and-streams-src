@@ -25,7 +25,6 @@ public class ProcessorSample {
     }
 
     private static Topology getTopology(){
-        // TODO: here we construct the Kafka Streams topology
         Topology builder = new Topology();
         builder.addSource("Source", "lines-topic");
         builder.addProcessor("Process", new WordCountProcessorSupplier(), "Source");
@@ -48,9 +47,9 @@ public class ProcessorSample {
         settings.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
         settings.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        settings.put(StreamsConfig.PRODUCER_PREFIX + ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
+        settings.put(StreamsConfig.producerPrefix(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG),
             "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor");
-        settings.put(StreamsConfig.CONSUMER_PREFIX + ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG,
+        settings.put(StreamsConfig.consumerPrefix(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG),
             "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor");
         return settings;        
     }
