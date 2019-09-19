@@ -1,7 +1,7 @@
 package streams;
 
+import java.time.Duration;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -34,7 +34,6 @@ public class JoinSample {
 
         final Serde<String> stringSerde = Serdes.String();
 
-        // TODO: here we construct the Kafka Streams topology
         KStream<String, String> leftStream = builder.stream("left-topic", 
             Consumed.with(stringSerde, stringSerde));
         KStream<String, String> rightStream = builder.stream("right-topic", 
@@ -42,7 +41,7 @@ public class JoinSample {
         leftStream
             .join(rightStream,
                 (leftValue, rightValue) -> "[" + leftValue + ", " + rightValue + "]",
-                JoinWindows.of(TimeUnit.MINUTES.toMillis(60)),
+                JoinWindows.of(Duration.ofMinutes(5)),
                 Joined.with(stringSerde, stringSerde, stringSerde)
             )
             .to("joined-topic", Produced.with(stringSerde, stringSerde));
