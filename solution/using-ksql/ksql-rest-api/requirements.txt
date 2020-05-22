@@ -1,2 +1,2 @@
-confluent_kafka
+confluent-kafka==1.4.1
 requests
