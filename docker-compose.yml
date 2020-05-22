@@ -1,73 +1,106 @@
-version: '3.5'
+version: '2.2'
 services:
   zookeeper:
-    image: "confluentinc/cp-zookeeper:5.3.0"
     hostname: zookeeper
     container_name: zookeeper
+    image: "confluentinc/cp-zookeeper:5.5.0-1-ubi8"
     networks:
-      - streams-net
+      - kafka-net
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
-    image: "confluentinc/cp-enterprise-kafka:5.3.0"
+    image: "confluentinc/cp-enterprise-kafka:5.5.0-1-ubi8"
     hostname: kafka
     container_name: kafka
+    ports:
+      - "9092:9092"
     networks:
-      - streams-net
+      - kafka-net
     environment:
-      KAFKA_BROKER_ID: 101
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_DELETE_TOPIC_ENABLE: "true"
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
-      CONFLUENT_METRICS_REPORTER_TOPIC_CREATE: "false"
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka:9092"
-      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   schema-registry:
-    image: "confluentinc/cp-schema-registry:5.3.0"
     hostname: schema-registry
     container_name: schema-registry
+    image: "confluentinc/cp-schema-registry:5.5.0-1-ubi8"
     networks:
-      - streams-net
+      - kafka-net
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
       SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
-
-  ksql-server:
-    image: "confluentinc/cp-ksql-server:5.3.0"
-    hostname: ksql-server
-    container_name: ksql-server
+    
+  ksqldb-server:
+    hostname: ksqldb-server
+    container_name: ksqldb-server
+    image: "confluentinc/cp-ksqldb-server:5.5.0-1-ubi8"
     ports:
       - "8088:8088"
     networks:
-      - streams-net
+      - kafka-net
+    volumes:
+      - .data:/etc/ksql/
     environment:
       KSQL_CONFIG_DIR: "/etc/ksql"
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties"
       KSQL_BOOTSTRAP_SERVERS: "kafka:9092"
       KSQL_HOST_NAME: ksql-server
-      KSQL_APPLICATION_ID: "scaling-demo"
+      KSQL_APPLICATION_ID: "str-class"
       KSQL_LISTENERS: "http://0.0.0.0:8088"
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
       KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       KSQL_KSQL_SERVER_UI_ENABLED: "false"
+      # ksqlDB server log
+      KSQL_LOG4J_APPENDER_KAFKA_APPENDER: "org.apache.kafka.log4jappender.KafkaLog4jAppender"
+      KSQL_LOG4J_APPENDER_KAFKA_APPENDER_LAYOUT: "io.confluent.common.logging.log4j.StructuredJsonLayout"
+      KSQL_LOG4J_APPENDER_KAFKA_APPENDER_BROKERLIST: "localhost:9092"
+      KSQL_LOG4J_APPENDER_KAFKA_APPENDER_TOPIC: "KSQL_LOG"
+      KSQL_LOG4J_LOGGER_IO_CONFLUENT_KSQL: "INFO,kafka_appender"
+      # ksqlDB process log
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: "ksql_processing_log_topic"
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_PARTITIONS: "1"
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: "1"
+      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+      KSQL_KSQL_LOGGING_PROCESSING_STREAM_NAME: "ksql_processing_log_stream"
+      KSQL_KSQL_LOGGING_PROCESSING_ROWS_INCLUDE: "true"
+
+  tools:
+    image: cnfltraining/training-tools:5.5
+    hostname: tools
+    container_name: tools
+    networks:
+      - kafka-net
+    volumes:
+      - .:/root/confluent-streams/labs/using-ksql
+    working_dir: /root/confluent-streams/labs/using-ksql
+    command: /bin/bash
+    tty: true
 
   control-center:
-    image: confluentinc/cp-enterprise-control-center:5.3.0
-    hostname: control-center
-    container_name: control-center
+    image: confluentinc/cp-enterprise-control-center:5.5.0-1-ubi8
+    depends_on:
+      - zookeeper
+      - kafka
+  #      - connect
     restart: always
     networks:
-      - streams-net
+      - kafka-net
     ports:
       - "9021:9021"
     environment:
@@ -80,21 +113,10 @@ services:
       CONTROL_CENTER_METRICS_TOPIC_REPLICATION: 1
       CONTROL_CENTER_STREAMS_NUM_STREAM_THREADS: 1
       CONTROL_CENTER_STREAMS_CONSUMER_REQUEST_TIMEOUT_MS: "960032"
-      CONTROL_CENTER_KSQL_URL: "http://ksql-server:8088"
+      CONTROL_CENTER_CONNECT_CLUSTER: "connect:8083"
+      CONTROL_CENTER_KSQL_URL: "http://ksqldb-server:8088"
       CONTROL_CENTER_KSQL_ADVERTISED_URL: "http://localhost:8088"
       CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
-
-  tools:
-    image: cnfltraining/training-tools:19.06
-    hostname: tools
-    networks:
-      - streams-net
-    volumes:
-      - .:/root/confluent-streams/labs/deployment
-    working_dir: /root/confluent-streams/labs/deployment
-    command: /bin/bash
-    tty: true
-
-
+  
 networks:
-  streams-net:
+  kafka-net:

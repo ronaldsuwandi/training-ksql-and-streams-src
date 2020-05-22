@@ -46,8 +46,8 @@ public class WordCountProcessorSupplier implements ProcessorSupplier<String, Str
         }
 
         @Override
-        public void process(String dummy, String line) {
-            String[] words = line.toLowerCase(Locale.getDefault()).split(" ");
+        public void process(String recordKey, String recordValue) {
+            String[] words = recordValue.toLowerCase(Locale.getDefault()).split(" ");
             for (String word : words) {
                 Integer oldValue = this.kvStore.get(word);
                 if (oldValue == null) {
