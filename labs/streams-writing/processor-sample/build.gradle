@@ -3,7 +3,7 @@ plugins {
   id 'application'
 }
 
-mainClassName = 'streams.ProcessorSample'
+mainClassName = 'streams.CustomTransformerApp'
 
 repositories {
     mavenCentral()
@@ -11,7 +11,7 @@ repositories {
 }
 
 jar {
-    baseName = 'processor-sample'
+    baseName = 'processor-opt'
 }
 
 sourceCompatibility = 11
