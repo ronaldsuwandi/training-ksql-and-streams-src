@@ -46,6 +46,8 @@ services:
   ksqldb-server:
     hostname: ksqldb-server
     container_name: ksqldb-server
+    depends_on:
+      - kafka
     image: "confluentinc/cp-ksqldb-server:5.5.0-1-ubi8"
     ports:
       - "8088:8088"
@@ -65,12 +67,6 @@ services:
       KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       KSQL_KSQL_SERVER_UI_ENABLED: "false"
-      # ksqlDB server log
-      KSQL_LOG4J_APPENDER_KAFKA_APPENDER: "org.apache.kafka.log4jappender.KafkaLog4jAppender"
-      KSQL_LOG4J_APPENDER_KAFKA_APPENDER_LAYOUT: "io.confluent.common.logging.log4j.StructuredJsonLayout"
-      KSQL_LOG4J_APPENDER_KAFKA_APPENDER_BROKERLIST: "localhost:9092"
-      KSQL_LOG4J_APPENDER_KAFKA_APPENDER_TOPIC: "KSQL_LOG"
-      KSQL_LOG4J_LOGGER_IO_CONFLUENT_KSQL: "INFO,kafka_appender"
       # ksqlDB process log
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: "ksql_processing_log_topic"
