@@ -11,7 +11,7 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.JoinWindows;
-import org.apache.kafka.streams.kstream.Joined;
+import org.apache.kafka.streams.kstream.StreamJoined;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
 
@@ -42,7 +42,7 @@ public class JoinSample {
             .join(rightStream,
                 (leftValue, rightValue) -> "[" + leftValue + ", " + rightValue + "]",
                 JoinWindows.of(Duration.ofMinutes(5)),
-                Joined.with(stringSerde, stringSerde, stringSerde)
+                StreamJoined.with(stringSerde, stringSerde, stringSerde)
             )
             .to("joined-topic", Produced.with(stringSerde, stringSerde));
 
