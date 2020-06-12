@@ -6,6 +6,7 @@ services:
     image: "confluentinc/cp-zookeeper:5.5.0-1-ubi8"
     networks:
       - kafka-net
+    restart: always
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -18,6 +19,7 @@ services:
       - "9092:9092"
     networks:
       - kafka-net
+    restart: always
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -38,6 +40,7 @@ services:
     image: "confluentinc/cp-schema-registry:5.5.0-1-ubi8"
     networks:
       - kafka-net
+    restart: always
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
@@ -55,6 +58,7 @@ services:
       - kafka-net
     volumes:
       - .data:/etc/ksql/
+    restart: always
     environment:
       KSQL_CONFIG_DIR: "/etc/ksql"
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties"
@@ -80,6 +84,7 @@ services:
     image: cnfltraining/training-tools:5.5
     hostname: tools
     container_name: tools
+    restart: always
     networks:
       - kafka-net
     volumes:
