@@ -1,7 +1,7 @@
 version: "3.5"
 services:
   zookeeper:
-    image: "confluentinc/cp-zookeeper:5.5.0-1-ubi8"
+    image: confluentinc/cp-zookeeper:5.5.0
     hostname: zookeeper
     restart: always
     hostname: zookeeper
@@ -20,7 +20,7 @@ services:
       - "2181:2181"
 
   kafka:
-    image: "confluentinc/cp-enterprise-kafka:5.5.0-1-ubi8"
+    image: confluentinc/cp-enterprise-kafka:5.5.0
     hostname: kafka
     container_name: kafka
     depends_on:
@@ -32,6 +32,7 @@ services:
     ports:
       - "9091:9091"
       - "29091:29091"
+    restart: always
     environment:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: SASL_SSL:SASL_SSL,SSL:SSL,SASL_SSL_HOST:SASL_SSL,PLAINTEXT:PLAINTEXT
@@ -70,13 +71,13 @@ services:
       KAFKA_SSL_KEY_CREDENTIALS: kafka_sslkey_creds
       KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.kafka.truststore.jks
       KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka_truststore_creds
-      # enables 2-way authentication
+      # enables 2-way authentication if connecting via the SSL listener
       KAFKA_SSL_CLIENT_AUTH: "required"
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
       KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/broker_jaas.conf
 
   control-center:
-    image: confluentinc/cp-enterprise-control-center:5.5.0-1-ubi8
+    image: confluentinc/cp-enterprise-control-center:5.5.0
     hostname: control-center
     container_name: control-center
     restart: always
@@ -112,9 +113,10 @@ services:
       CONTROL_CENTER_STREAMS_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
 
   tools:
-    image: cnfltraining/training-tools:5.5
+    image: cnfltraining/training-tools:19.06
     hostname: tools
     container_name: tools
+    restart: always
     networks:
       - streams-net
     volumes:
