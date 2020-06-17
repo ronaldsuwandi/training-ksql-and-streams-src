@@ -1,8 +1,13 @@
-experiments/
 target/
 .gradle
 build/
 .vscode/*
 !.vscode/launch.json
 !.vscode/tasks.json
-.DS_Store
+**/.DS_Store
+.gradle/
+bin/
+obj/
+.classpath
+.project
+.settings
