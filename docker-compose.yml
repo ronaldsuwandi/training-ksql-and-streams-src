@@ -97,10 +97,9 @@ services:
     image: confluentinc/cp-enterprise-control-center:5.5.0-1-ubi8
     hostname: control-center
     container_name: control-center
-      depends_on:
+    depends_on:
       - zookeeper
       - kafka
-  #      - connect
     restart: always
     networks:
       - kafka-net
