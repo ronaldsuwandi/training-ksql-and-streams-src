@@ -2,6 +2,7 @@ version: "3.5"
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:5.5.0
+    restart: always
     hostname: zookeeper
     restart: always
     hostname: zookeeper
@@ -21,6 +22,7 @@ services:
 
   kafka:
     image: confluentinc/cp-enterprise-kafka:5.5.0
+    restart: always
     hostname: kafka
     container_name: kafka
     depends_on:
@@ -78,6 +80,7 @@ services:
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:5.5.0
+    restart: always
     hostname: control-center
     container_name: control-center
     restart: always
@@ -114,6 +117,7 @@ services:
 
   tools:
     image: cnfltraining/training-tools:19.06
+    restart: always
     hostname: tools
     container_name: tools
     restart: always
