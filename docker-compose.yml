@@ -4,6 +4,7 @@ services:
     hostname: zookeeper
     container_name: zookeeper
     image: "confluentinc/cp-zookeeper:5.5.0-1-ubi8"
+    restart: always
     networks:
       - kafka-net
     restart: always
@@ -13,6 +14,7 @@ services:
 
   kafka:
     image: "confluentinc/cp-enterprise-kafka:5.5.0-1-ubi8"
+    restart: always
     hostname: kafka
     container_name: kafka
     ports:
@@ -29,6 +31,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka:9092"
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -38,6 +41,7 @@ services:
     hostname: schema-registry
     container_name: schema-registry
     image: "confluentinc/cp-schema-registry:5.5.0-1-ubi8"
+    restart: always
     networks:
       - kafka-net
     restart: always
@@ -52,6 +56,7 @@ services:
     depends_on:
       - kafka
     image: "confluentinc/cp-ksqldb-server:5.5.0-1-ubi8"
+    restart: always
     ports:
       - "8088:8088"
     networks:
@@ -82,6 +87,7 @@ services:
 
   tools:
     image: cnfltraining/training-tools:5.5
+    restart: always
     hostname: tools
     container_name: tools
     restart: always
@@ -95,6 +101,7 @@ services:
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:5.5.0-1-ubi8
+    restart: always
     hostname: control-center
     container_name: control-center
     depends_on:
