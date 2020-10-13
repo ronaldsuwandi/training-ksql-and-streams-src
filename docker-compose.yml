@@ -3,7 +3,7 @@ services:
   zookeeper:
     hostname: zookeeper
     container_name: zookeeper
-    image: "confluentinc/cp-zookeeper:5.5.0-1-ubi8"
+    image: "confluentinc/cp-zookeeper:6.0.0-1-ubi8"
     restart: always
     networks:
       - kafka-net
@@ -13,7 +13,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
-    image: "confluentinc/cp-enterprise-kafka:5.5.0-1-ubi8"
+    image: "confluentinc/cp-enterprise-kafka:6.0.0-1-ubi8"
     restart: always
     hostname: kafka
     container_name: kafka
@@ -43,7 +43,7 @@ services:
   schema-registry:
     hostname: schema-registry
     container_name: schema-registry
-    image: "confluentinc/cp-schema-registry:5.5.0-1-ubi8"
+    image: "confluentinc/cp-schema-registry:6.0.0-1-ubi8"
     restart: always
     networks:
       - kafka-net
@@ -58,7 +58,7 @@ services:
     container_name: ksqldb-server
     depends_on:
       - kafka
-    image: "confluentinc/cp-ksqldb-server:5.5.0-1-ubi8"
+    image: "confluentinc/cp-ksqldb-server:6.0.0-1-ubi8"
     restart: always
     ports:
       - "8088:8088"
@@ -89,7 +89,7 @@ services:
       KSQL_KSQL_LOGGING_PROCESSING_ROWS_INCLUDE: "true"
 
   tools:
-    image: cnfltraining/training-tools:5.5
+    image: cnfltraining/training-tools:6.0
     restart: always
     hostname: tools
     container_name: tools
@@ -103,7 +103,7 @@ services:
     tty: true
 
   control-center:
-    image: confluentinc/cp-enterprise-control-center:5.5.0-1-ubi8
+    image: confluentinc/cp-enterprise-control-center:6.0.0-1-ubi8
     restart: always
     hostname: control-center
     container_name: control-center

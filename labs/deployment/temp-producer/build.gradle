@@ -19,5 +19,5 @@ targetCompatibility = 11
 
 dependencies {
     compile group: "org.slf4j", name: "slf4j-log4j12", version: "1.7.30"
-    compile group: "org.apache.kafka", name: "kafka-clients", version: "2.5.0"
+    compile group: "org.apache.kafka", name: "kafka-clients", version: "2.6.0"
 }
