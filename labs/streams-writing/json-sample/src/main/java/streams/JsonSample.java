@@ -57,9 +57,6 @@ public class JsonSample {
 
     private static Serde<TempReading> getJsonSerde(){
         
-        Map<String, Object> serdeProps = new HashMap<>();
-        serdeProps.put("json.value.type", TempReading.class);
-
         // TODO: create a JSON serde for the TempReading class using KafkaJson serdes
 
     }

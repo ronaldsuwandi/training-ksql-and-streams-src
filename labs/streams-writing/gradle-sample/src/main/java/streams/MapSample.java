@@ -23,7 +23,7 @@ public class MapSample {
     public static void main(String[] args) {
         System.out.println("*** Starting Map Sample Application ***");
 	
-        Properties settings = new Properties();
+    
         // TODO: Configure application.id and bootstrap.servers properties using the StreamsConfig class
 
         
