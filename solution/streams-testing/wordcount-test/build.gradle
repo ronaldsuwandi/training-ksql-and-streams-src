@@ -7,18 +7,18 @@ repositories {
 
 dependencies {
     compile group: "org.slf4j", name: "slf4j-log4j12", version: "1.7.30"
-    compile group: "org.apache.kafka", name: "kafka-clients", version: "2.5.0"
-    compile group: "org.apache.kafka", name: "kafka-streams", version: "2.5.0"
+    compile group: "org.apache.kafka", name: "kafka-clients", version: "2.6.0"
+    compile group: "org.apache.kafka", name: "kafka-streams", version: "2.6.0"
    
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.hamcrest', name: 'hamcrest', version: '2.1'
     testCompile group: 'org.hamcrest', name: 'hamcrest-library', version: '2.1'
-    testCompile group:'org.apache.kafka', name:'kafka-streams', version:'2.5.0', classifier: 'test'
-    testCompile group:'org.apache.kafka', name:'kafka-clients', version:'2.5.0', classifier: 'test'
-    testCompile (group:'org.apache.kafka', name:'kafka_2.12', version:'2.5.0', classifier: 'test') {
+    testCompile group:'org.apache.kafka', name:'kafka-streams', version:'2.6.0', classifier: 'test'
+    testCompile group:'org.apache.kafka', name:'kafka-clients', version:'2.6.0', classifier: 'test'
+    testCompile (group:'org.apache.kafka', name:'kafka_2.12', version:'2.6.0', classifier: 'test') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
-    testCompile (group:'org.apache.kafka', name:'kafka_2.12', version:'2.5.0') {
+    testCompile (group:'org.apache.kafka', name:'kafka_2.12', version:'2.6.0') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
 }
