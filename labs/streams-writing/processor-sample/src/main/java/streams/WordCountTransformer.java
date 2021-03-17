@@ -34,6 +34,12 @@ public class WordCountTransformer implements Transformer<String, String, KeyValu
   @Override
   public KeyValue<String, Long> transform(String word, String dummy) {
     // TODO: Get the correct entry from the keystore and update it or create an intial entry
+    Long oldValue = this.kvStore.get(word);
+    if (oldValue == null) {
+        this.kvStore.put(word, 1L);
+    } else {
+        this.kvStore.put(word, oldValue + 1);
+    }
     return null;
   }
 
