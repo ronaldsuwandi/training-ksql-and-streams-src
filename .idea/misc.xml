@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <file type="web" url="file://$PROJECT_DIR$/labs/deployment/streams-app" />
+    <file type="web" url="file://$PROJECT_DIR$/labs/deployment/temp-producer" />
+    <file type="web" url="file://$PROJECT_DIR$/labs/monitoring/jmx-sample" />
+    <file type="web" url="file://$PROJECT_DIR$/labs/monitoring/processor-sample" />
+    <file type="web" url="file://$PROJECT_DIR$/labs/monitoring/word-count" />
+    <file type="web" url="file://$PROJECT_DIR$/labs/security/secure-app" />
+    <file type="web" url="file://$PROJECT_DIR$/labs/streams-testing/simple-test" />
+    <file type="web" url="file://$PROJECT_DIR$/labs/streams-testing/wordcount-test" />
+    <file type="web" url="file://$PROJECT_DIR$/labs/streams-writing/gradle-sample" />
+    <file type="web" url="file://$PROJECT_DIR$/labs/streams-writing/join-sample" />
+    <file type="web" url="file://$PROJECT_DIR$/labs/streams-writing/json-sample" />
+    <file type="web" url="file://$PROJECT_DIR$/labs/streams-writing/processor-sample" />
+    <file type="web" url="file://$PROJECT_DIR$/solution/deployment/streams-app" />
+    <file type="web" url="file://$PROJECT_DIR$/solution/deployment/temp-producer" />
+    <file type="web" url="file://$PROJECT_DIR$/solution/monitoring/jmx-sample" />
+    <file type="web" url="file://$PROJECT_DIR$/solution/monitoring/processor-sample" />
+    <file type="web" url="file://$PROJECT_DIR$/solution/monitoring/word-count" />
+    <file type="web" url="file://$PROJECT_DIR$/solution/security/secure-app" />
+    <file type="web" url="file://$PROJECT_DIR$/solution/streams-testing/simple-test" />
+    <file type="web" url="file://$PROJECT_DIR$/solution/streams-testing/wordcount-test" />
+    <file type="web" url="file://$PROJECT_DIR$/solution/streams-writing/gradle-sample" />
+    <file type="web" url="file://$PROJECT_DIR$/solution/streams-writing/join-sample" />
+    <file type="web" url="file://$PROJECT_DIR$/solution/streams-writing/json-sample" />
+    <file type="web" url="file://$PROJECT_DIR$/solution/streams-writing/processor-sample" />
+  </component>
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/labs/streams-writing/maven-sample/pom.xml" />
+        <option value="$PROJECT_DIR$/solution/streams-writing/maven-sample/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_15" project-jdk-name="15" project-jdk-type="JavaSDK" />
+</project>
