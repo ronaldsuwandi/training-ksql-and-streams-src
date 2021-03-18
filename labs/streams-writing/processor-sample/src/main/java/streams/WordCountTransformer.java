@@ -21,7 +21,7 @@ public class WordCountTransformer implements Transformer<String, String, KeyValu
         PunctuationType.STREAM_TIME,
         timestamp -> {
           KeyValueIterator<String, Long> iter = kvStore.all();
-          System.out.println("------ " + context.taskId() + " - " + timestamp + " -----" + " ");
+          System.out.println(">------ " + context.taskId() + " - " + timestamp + " -----<" + " ");
           while (iter.hasNext()) {
             KeyValue<String, Long> entry = iter.next();
             System.out.println("[" + entry.key + ", " + entry.value + "]");
@@ -33,6 +33,7 @@ public class WordCountTransformer implements Transformer<String, String, KeyValu
 
   @Override
   public KeyValue<String, Long> transform(String word, String dummy) {
+      System.out.println("transform->"+word);
     // TODO: Get the correct entry from the keystore and update it or create an intial entry
     Long oldValue = this.kvStore.get(word);
     if (oldValue == null) {

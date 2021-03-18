@@ -8,37 +8,33 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
-import org.apache.kafka.streams.state.KeyValueStore;
 
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CompletableFuture;
 
 public class CustomTransformerApp {
-  private static final String APPLICATION_ID = "custom-transformer-v0.1.0";
+  private static final String APPLICATION_ID = "custom-transformer-v0.1.0-1-NEW1";
   private static final String APPLICATION_NAME = "Custom Transformer App";
 
-  public static void main(String[] args) throws InterruptedException {
+  public static void main(String[] args) throws Exception {
     System.out.printf("*** Starting %s Application ***%n", APPLICATION_NAME);
 
     Properties config = getConfig();
     Topology topology = getTopology();
 
-    final CountDownLatch latch = new CountDownLatch(1);
-    try {
-      KafkaStreams streams = startApp(config, topology);
-      setupShutdownHook(streams, latch);
-      latch.await();
-    } catch (final Throwable e) {
-      System.exit(1);
-    }
-    System.exit(0);
+    final CompletableFuture<Void> done = new CompletableFuture<>();
+    KafkaStreams streams = startApp(config, topology);
+    setupShutdownHook(done);
+    done.get();
+    streams.close();
   }
 
-  private static Topology getTopology() {
+  public static Topology getTopology() {
     StreamsBuilder builder = new StreamsBuilder();
     StoreBuilder <KeyValueStore<String, Long>> storeBuilder =  Stores.keyValueStoreBuilder(
         Stores.inMemoryKeyValueStore("Counts"), Serdes.String(), Serdes.Long());
@@ -60,6 +56,7 @@ public class CustomTransformerApp {
     settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
     settings.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
     settings.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    settings.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 100);
     return settings;
   }
 
@@ -69,14 +66,13 @@ public class CustomTransformerApp {
     return streams;
   }
 
-  private static void setupShutdownHook(KafkaStreams streams, CountDownLatch latch) {
+  private static void setupShutdownHook(CompletableFuture<Void> done) {
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(
                 () -> {
                   System.out.printf("### Stopping %s Application ###%n", APPLICATION_NAME);
-                  streams.close();
-                  latch.countDown();
+                  done.complete(null);
                 }));
   }
 }

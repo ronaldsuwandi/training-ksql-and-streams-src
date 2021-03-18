@@ -124,6 +124,8 @@ public class TopologyProviderTest {
         TODO: Assert that the actual word counts match the expected word counts.
         HINT: Use IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived
         */
-
+        List<KeyValue<String, Long>> actualWordCounts = IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived(
+                consumerConfig, outputTopic, expectedWordCounts.size());
+        assertThat(actualWordCounts, containsInAnyOrder(expectedWordCounts.toArray()));
     }
 }
